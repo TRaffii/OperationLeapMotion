@@ -9,12 +9,18 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.builder.ImageBuilder;
+import de.lessvoid.nifty.builder.LayerBuilder;
+import de.lessvoid.nifty.builder.ScreenBuilder;
+import de.lessvoid.nifty.controls.button.builder.ButtonBuilder;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.*;
+import de.lessvoid.nifty.loaderv2.types.PanelType;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import de.lessvoid.nifty.tools.Color;
 import java.util.Date;
+import mygame.Main;
 
 /**
  *
@@ -24,40 +30,61 @@ public class StartScreenController  extends AbstractAppState implements ScreenCo
     
     private Nifty nifty;
     private Screen screen;
+    private Element control;
     private SimpleApplication app;
+    Date effectStart;
     private boolean  succesfullInteration = false;
     public void bind(Nifty nifty, Screen screen) {
         this.nifty = nifty;
         this.screen = screen;
-       
+        nifty.registerMouseCursor("hand", "Interface/mouse-cursor-hand.png", 5, 4);
     }
     /** Custom methods */
-    public void startGame(String nextScreen)
+    public void StartGameEnd(String nextScreen)
     {
-        nifty.gotoScreen(nextScreen);
+        if(activateButton())
+        {
+            nifty.gotoScreen(nextScreen);
+        }
     }
 
     public StartScreenController() {
     }
    
-    public void QuittingOn() throws InterruptedException
+
+    public void OptionsOn()
     {
-        Element niftyElement = nifty.getCurrentScreen().findElementByName("panel_bottom_right");
-        niftyElement.getRenderer(PanelRenderer.class).setBackgroundColor(new Color("#9ede00"));
-        // swap old with new text
-        Runnable colorChangeable = new ThreadColorChangeable(73,66,61,niftyElement);
-        Thread colorThread = new Thread(colorChangeable);
-        colorThread.start();
-        colorThread.join();
-        colorThread.interrupt();
-       // app.stop();
+        effectStart = new Date();
+    }
+    public void OptionsOff()
+    {
+        if(activateButton())
+        {
+            nifty.gotoScreen("options");
+           
+        }
+    }
+    public void QuittingOff()
+    {
+        if(activateButton())
+        {
+            System.out.println("KONIEC");
+            app.stop();
+        }
     }
     public StartScreenController(String data)
     {
         
     }
     
-
+    private boolean  activateButton()
+    {
+        long  diff = new Date().getTime() - effectStart.getTime();
+        if(diff>2400)
+            return true;
+        else
+            return false;
+    }
     public void onStartScreen() {
     }
 
@@ -73,7 +100,6 @@ public class StartScreenController  extends AbstractAppState implements ScreenCo
     @Override
     public void update(float tpf)
     {
-    
     }
      
 }

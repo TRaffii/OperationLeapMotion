@@ -21,6 +21,7 @@ public class ThreadColorChangeable implements Runnable {
         Element niftyElement;
 
     public ThreadColorChangeable(int localR, int localG, int localB, Element niftyElement) {
+        
         this.localR = localR;
         this.localG = localG;
         this.localB = localB;

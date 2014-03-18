@@ -5,10 +5,17 @@ import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.*;
+import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.leapmotion.leap.Controller;
+import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.elements.Element;
+import de.lessvoid.nifty.elements.render.PanelRenderer;
+import de.lessvoid.nifty.tools.Color;
+import java.util.Date;
+import mygame.Controller.StartScreenController;
 import mygame.Controller.UserLogin;
 import tonegod.gui.controls.buttons.ButtonAdapter;
 import tonegod.gui.controls.windows.Panel;
@@ -25,6 +32,7 @@ public class Main extends SimpleApplication  {
   // Create a sample listener and controller
         LeapListener listener;
         public int winCount = 0;
+        Nifty nifty;
         Controller controller = new Controller();
         private Screen screen;
   public static void main(String[] args) {
@@ -47,7 +55,7 @@ public class Main extends SimpleApplication  {
       
       
       //Leap motion section
-      //controller.addListener(listener);
+      controller.addListener(listener);
 //      DirectionalLight sun = new DirectionalLight();
 //      sun.setDirection((new Vector3f(-0.1f,-0.7f,-1.0f)));
 //      rootNode.addLight(sun);
@@ -60,11 +68,21 @@ public class Main extends SimpleApplication  {
   }
   private void initGUIScreen()
   {
-        Screen screen = new Screen(this, "tonegod/gui/style/def/style_map.xml");
-        guiNode.addControl(screen);
-        screen.setUseCustomCursors(true);
-        UserLogin us = new UserLogin(this, screen);
-        stateManager.attach(us);
+        NiftyJmeDisplay niftyDisplay = new NiftyJmeDisplay(
+            assetManager, inputManager, audioRenderer, guiViewPort);
+        /** Create a new NiftyGUI object */
+        nifty = niftyDisplay.getNifty();
+       System.out.println( nifty.getVersion());
+        StartScreenController startScreenState = new StartScreenController();
+        startScreenState.initialize(stateManager, this);
+        stateManager.attach(startScreenState);
+        /** Read your XML and initialize your custom ScreenController */
+        nifty.fromXml("Interface/screen.xml", "start",startScreenState);
+        // nifty.fromXml("Interface/helloworld.xml", "start", new MySettingsScreen(data));
+        // attach the Nifty display to the gui view port as a processor
+        guiViewPort.addProcessor(niftyDisplay);
+        // disable the fly cam
+        flyCam.setDragToRotate(true);
         // Add it to out initial window
         
 
@@ -72,22 +90,18 @@ public class Main extends SimpleApplication  {
      
 
   }
-  public final void createNewWindow(String someWindowTitle) {
-    Window nWin = new Window(
-        screen,
-        "Window" + winCount,
-        new Vector2f( (screen.getWidth()/2)-175, (screen.getHeight()/2)-100 )
-    );
-    nWin.setWindowTitle(someWindowTitle);
-    screen.addElement(nWin);
-    winCount++;
-}
+
   @Override
   public void stop()
   {
       controller.removeListener(listener);
-      System.out.println("test");
+      
       super.stop();
      
   }
+  @Override
+  public void simpleUpdate(float tpf) {
+        // make the player rotate:
+     
+    }
 }
