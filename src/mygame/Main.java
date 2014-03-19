@@ -1,6 +1,7 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.audio.AudioNode;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.niftygui.NiftyJmeDisplay;
@@ -9,7 +10,11 @@ import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.leapmotion.leap.Controller;
 import de.lessvoid.nifty.Nifty;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.parsers.ParserConfigurationException;
 import mygame.Controller.StartScreenController;
+import mygame.model.SettingsIO;
 import tonegod.gui.core.Screen;
 
 /**
@@ -23,36 +28,41 @@ public class Main extends SimpleApplication  {
         LeapListener listener;
         public int winCount = 0;
         Nifty nifty;
+        AudioNode music;
         Controller controller = new Controller();
         private Screen screen;
   public static void main(String[] args) {
-    Main app = new Main();
-      AppSettings settings = new AppSettings(true);
-      //my custom Settings of app
-      settings.setTitle("Operation Leap Motion");
-      app.setSettings(settings);
-    app.start();
+        Main app = new Main();
+          AppSettings settings = new AppSettings(true);
+          //my custom Settings of app
+          settings.setTitle("Operation Leap Motion");
+          app.setSettings(settings);
+        app.start();
   }
  
   public void simpleInitApp() {
-      Box b = new Box(1,1,1);
-      Geometry geom = new Geometry("Box",b);
-      Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
-      mat.setColor("Color", ColorRGBA.Pink);
-      geom.setMaterial(mat);
-      rootNode.attachChild(geom);
-      listener = new LeapListener(this.settings.getWidth(),this.settings.getHeight());
-      
-      
-      //Leap motion section
-      controller.addListener(listener);
-//      DirectionalLight sun = new DirectionalLight();
-//      sun.setDirection((new Vector3f(-0.1f,-0.7f,-1.0f)));
-//      rootNode.addLight(sun);
-     
-      initGUIScreen();
-     
-      flyCam.setDragToRotate(true); //disable to fly CAM
+            
+                Box b = new Box(1,1,1);
+                Geometry geom = new Geometry("Box",b);
+                Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
+                mat.setColor("Color", ColorRGBA.Pink);
+                geom.setMaterial(mat);
+                rootNode.attachChild(geom);
+                listener = new LeapListener(this.settings.getWidth(),this.settings.getHeight());
+                SettingsIO settingFile = new SettingsIO("assets/Settings/ProgramSettings.xml");
+                /* A colored lit cube. Needs light source! */ 
+    
+                //Leap motion section
+                controller.addListener(listener);
+          //      DirectionalLight sun = new DirectionalLight();
+          //      sun.setDirection((new Vector3f(-0.1f,-0.7f,-1.0f)));
+          //      rootNode.addLight(sun);
+                initGUIScreen();
+                music = new AudioNode(assetManager, "Sounds/HappyBee.wav", true);
+                if(settingFile.Get("music").equals("on"))
+                    music.play();
+                flyCam.setDragToRotate(true); //disable to fly CAM
+           
        
       
   }

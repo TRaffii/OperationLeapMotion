@@ -44,6 +44,7 @@ public class StartScreenController  extends AbstractAppState implements ScreenCo
     {
         if(activateButton())
         {
+            nifty.fromXml("Interface/"+ nextScreen +".xml", nextScreen);
             nifty.gotoScreen(nextScreen);
         }
     }
@@ -60,6 +61,7 @@ public class StartScreenController  extends AbstractAppState implements ScreenCo
     {
         if(activateButton())
         {
+             nifty.fromXml("Interface/options.xml", "options");
             nifty.gotoScreen("options");
            
         }
