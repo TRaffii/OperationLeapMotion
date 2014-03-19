@@ -1,25 +1,15 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
-import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.*;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.leapmotion.leap.Controller;
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.elements.Element;
-import de.lessvoid.nifty.elements.render.PanelRenderer;
-import de.lessvoid.nifty.tools.Color;
-import java.util.Date;
 import mygame.Controller.StartScreenController;
-import mygame.Controller.UserLogin;
-import tonegod.gui.controls.buttons.ButtonAdapter;
-import tonegod.gui.controls.windows.Panel;
-import tonegod.gui.controls.windows.Window;
 import tonegod.gui.core.Screen;
 
 /**
@@ -95,7 +85,6 @@ public class Main extends SimpleApplication  {
   public void stop()
   {
       controller.removeListener(listener);
-      
       super.stop();
      
   }
