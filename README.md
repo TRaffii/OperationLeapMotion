@@ -1,10 +1,20 @@
-1.	Okienko konfiguracji:
+1.	Okienko konfiguracji - wstp:
     a) Nauka platformy jMonkey 
+    b) Stworzenie okienek głownych, konfiguracji
+    c) interakcja z użytkownikiem (Leap motion)
+    d) Dodanie odtwarzania muzyki
+    e) nifty GUI
 2.	Odczytywanie bazowej konfiguracji gry, zapisywanie konfiguracji
-a.	Dźwięk, ustawienia, poziom trudności itp.
+    a) Odczytanie czy muzyka ma zostać zagrana na początku startu
+3.  Baza danych 
+    b) Obsługa bazy danych przechowująca statystyki użytkowników 
+        - wyświetlanie użytkowników (ranking)
+        - zapisywanie użytkownika
 3.	Wątki:
-a.	Obsługa kontrolera , generowanie planszy – współbieżność?
-b.	Pobieranie aktualizacji
-4.	Zapisywanie danych o użytkownikach, ilość punktów
-5.	Pobieranie aktualizacji (mapy, assety itp)
+    a) Obsługa kontrolera w tle(obsługa myszki)
+    b) Animacje (?)
+    c) Pobieranie aktualizacji - np. zmiana View
+5.	Protokół sieciowy(assety, ustawienia - VIEW)
+    a) pobieranie aktualizacji z serwera zewnętrznego
 6.	Refaktoryzacja
+    a) zastosowanie MVC
