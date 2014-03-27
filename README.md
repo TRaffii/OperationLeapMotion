@@ -1,4 +1,5 @@
-1.	Okienko konfiguracji gry, plansza gry, jMonkeyEngine!,  raczej openGL 
+1.	Okienko konfiguracji:
+    a) Nauka platformy jMonkey 
 2.	Odczytywanie bazowej konfiguracji gry, zapisywanie konfiguracji
 a.	Dźwięk, ustawienia, poziom trudności itp.
 3.	Wątki:
