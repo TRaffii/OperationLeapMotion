@@ -10,11 +10,14 @@
     b) Obsługa bazy danych przechowująca statystyki użytkowników 
         - wyświetlanie użytkowników (ranking)
         - zapisywanie użytkownika
-3.	Wątki:
+4.  Obsługa gry:
+    a) Przechwytywanie rąk jako kontrolera
+    b) logika gry
+5.	Wątki:
     a) Obsługa kontrolera w tle(obsługa myszki)
     b) Animacje (?)
     c) Pobieranie aktualizacji - np. zmiana View
-5.	Protokół sieciowy(assety, ustawienia - VIEW)
+6.	Protokół sieciowy(assety, ustawienia - VIEW)
     a) pobieranie aktualizacji z serwera zewnętrznego
-6.	Refaktoryzacja
+7.	Refaktoryzacja
     a) zastosowanie MVC
