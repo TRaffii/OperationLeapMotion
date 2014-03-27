@@ -1,15 +1,16 @@
 1.	Okienko konfiguracji - wstp:
-    a) Nauka platformy jMonkey 
-    b) Stworzenie okienek głownych, konfiguracji
-    c) interakcja z użytkownikiem (Leap motion)
-    d) Dodanie odtwarzania muzyki
-    e) nifty GUI
-2.	Odczytywanie bazowej konfiguracji gry, zapisywanie konfiguracji
-    a) Odczytanie czy muzyka ma zostać zagrana na początku startu
+    a) Nauka platformy jMonkey  - done zajęcia nr 1
+    b) Stworzenie okienek głownych, konfiguracji - done zajęcia nr 1
+    c) interakcja z użytkownikiem (Leap motion) - done zajęcia nr 1
+    d) Dodanie odtwarzania muzyki - done zajęcia nr 1
+    e) nifty GUI - done zajęcia nr 1
+
+2.	Odczytywanie bazowej konfiguracji gry, zapisywanie konfiguracji - done zajęcia nr 1
+    a) Odczytanie czy muzyka ma zostać zagrana na początku startu - done zajęcia nr 1
 3.  Baza danych 
-    b) Obsługa bazy danych przechowująca statystyki użytkowników 
-        - wyświetlanie użytkowników (ranking)
-        - zapisywanie użytkownika
+    b) Obsługa bazy danych przechowująca statystyki użytkowników - done zajęcia nr 2
+        - wyświetlanie użytkowników (ranking) -  done zajęcia nr 2
+        - zapisywanie użytkownika - - done zajęcia nr 2 (dodanie przycisku)
 4.  Obsługa gry:
     a) Przechwytywanie rąk jako kontrolera
     b) logika gry
