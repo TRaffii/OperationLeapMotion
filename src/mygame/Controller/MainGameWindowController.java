@@ -5,9 +5,13 @@
 package mygame.Controller;
 
 import com.jme3.app.state.AbstractAppState;
+import com.jme3.math.Vector3f;
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.NiftyEventSubscriber;
+import de.lessvoid.nifty.controls.TextFieldChangedEvent;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
+import mygame.Main;
 
 /**
  *
@@ -24,6 +28,28 @@ public class MainGameWindowController extends AbstractAppState implements Screen
 /* A colored lit cube. Needs light source! */ 
           
        }
+@NiftyEventSubscriber(pattern="GTextfield.*")
+    public void onChange(String id, TextFieldChangedEvent event) {
+        System.out.println(id);
+        Float val = Float.parseFloat(event.getText());
+        Vector3f temp = Main.getThumbRotateVector();
+        if ("GTextfield2".equals(id )) {
+            temp.x = val;
+        }
+        else if ("GTextfield4".equals(id )) {
+            temp.y = val;
+        }
+        else if ("GTextfield5".equals(id )) {
+           temp.z = val;
+        }
+        Main.setThumbRotateVector(temp);
+    /*
+        Float val = Float.parseFloat(event.getText());
+        Vector3f temp = Main.getForeFingerVector();
+        temp.x = val;
+        Main.setForeFingerRotateVector(temp);
+        */
+    }
 
     public void onEndScreen() {
      }

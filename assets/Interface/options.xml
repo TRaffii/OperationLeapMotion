@@ -2,9 +2,9 @@
 <nifty>
   <screen id="options" controller="mygame.Controller.OptionsScreenController">
     <layer id="layer" backgroundColor="#003f" childLayout="center">
-      <panel height="25%" width="35%" align="center" valign="center" backgroundColor="#f60f"
-             childLayout="center" visibleToMouse="true">
-        ...
+      <panel height="100%" width="100%" align="center" valign="center" style="nifty-panel-red" childLayout="center"
+              visibleToMouse="true">
+       <text text="${CALL.getPlayers()}" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
       </panel>
     </layer>
   </screen>

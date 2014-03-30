@@ -2,8 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package mygame;
+package mygame.Controller;
 
+import com.jme3.math.FastMath;
+import com.jme3.math.Vector3f;
 import com.leapmotion.leap.CircleGesture;
 import com.leapmotion.leap.Controller;
 import com.leapmotion.leap.*;
@@ -12,7 +14,7 @@ import java.awt.AWTException;
 import java.awt.Robot;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import mygame.Main;
 
 /**
  *
@@ -20,9 +22,10 @@ import java.util.logging.Logger;
  */
 public class LeapListener extends Listener {
 
-    int screenWidth;    
+    int screenWidth;
     int screenHeight;
     Robot robot;
+
     public LeapListener(int screenWidth, int screenHeight) {
         this.screenHeight = screenHeight;
         this.screenWidth = screenWidth;
@@ -57,23 +60,23 @@ public class LeapListener extends Listener {
     public void onFrame(Controller controller) {
         // Get the most recent frame and report some basic information
         Frame frame = controller.frame();
+       /*
         System.out.println("Frame id: " + frame.id()
-                         + ", timestamp: " + frame.timestamp()
-                         + ", hands: " + frame.hands().count()
-                         + ", fingers: " + frame.fingers().count()
-                         + ", tools: " + frame.tools().count()
-                         + ", gestures " + frame.gestures().count());
-
+                + ", timestamp: " + frame.timestamp()
+                + ", hands: " + frame.hands().count()
+                + ", fingers: " + frame.fingers().count()
+                + ", tools: " + frame.tools().count()
+                + ", gestures " + frame.gestures().count());
+                * */
         if (!frame.hands().isEmpty()) {
             // Get the first hand
             Hand hand = frame.hands().get(0);
 
             // Check if the hand has any fingers
             FingerList fingers = hand.fingers();
-            if (!fingers.isEmpty()) {
+            
+            if (fingers.count() >0) { //use finger as mouse pointer
                 // Calculate the hand's average finger tip position
-                
-                  
                 Vector avgPos = Vector.zero();
                 for (Finger finger : fingers) {
                     avgPos = avgPos.plus(finger.tipPosition());
@@ -84,20 +87,31 @@ public class LeapListener extends Listener {
                 com.leapmotion.leap.Vector intersection = screen.intersect(fingers.get(0), true);
                 int screenw = screen.widthPixels();
                 int screenh = screen.heightPixels();
-                int posXi =(int)( intersection.get(0) * screenw);      // actual x position on your screen
-                int posYi = (int)(screenh - intersection.get(1) * screenh) ;
-                
-                robot.mouseMove(posXi,posYi);
-                avgPos = avgPos.divide(fingers.count());
-                System.out.println(screenList);
-                System.out.println("Posx = "+posXi+" \n Posy = "+posYi);
-                System.out.println("Hand has " + fingers.count()
-                                 + " fingers, average finger tip position: " + avgPos);
-            }
+                int posXi = (int) (intersection.get(0) * screenw);      // actual x position on your screen
+                int posYi = (int) (screenh - intersection.get(1) * screenh);
 
+                robot.mouseMove(posXi, posYi);
+                avgPos = avgPos.divide(fingers.count());
+                
+            }
+            if (fingers.count() == 2)//use finger as getter 
+            {
+                int podziel = 30;
+                int pomnoz = 3;
+                System.out.println("R:"+(fingers.get(0).direction().roll()+FastMath.PI));
+                System.out.println("P:"+(fingers.get(0).direction().pitch()+FastMath.PI));
+                System.out.println("Y:"+(fingers.get(0).direction().yaw()+FastMath.PI));
+                Main.setThumbRotateVector(new Vector3f(fingers.get(0).direction().pitch()+FastMath.PI, fingers.get(0).direction().yaw()+FastMath.PI, (  fingers.get(0).direction().roll()+FastMath.PI)));
+                Main.setThumbVector(new Vector3f(fingers.get(0).tipPosition().getX()/podziel, (fingers.get(0).tipPosition().getY()-200)/podziel, fingers.get(0).tipPosition().getZ()/podziel));
+                
+                Main.setForeFingerRotateVector(new Vector3f(fingers.get(1).direction().pitch()+FastMath.PI, fingers.get(1).direction().yaw()+FastMath.PI, ( fingers.get(1).direction().roll()+FastMath.PI)));
+                Main.setForeFingerVector(new Vector3f((fingers.get(1).tipPosition().getX()+30)/podziel, (fingers.get(1).tipPosition().getY()-200)/podziel, fingers.get(1).tipPosition().getZ()/podziel));
+               
+            }
+            /*
             // Get the hand's sphere radius and palm position
             System.out.println("Hand sphere radius: " + hand.sphereRadius()
-                             + " mm, palm position: " + hand.palmPosition());
+                    + " mm, palm position: " + hand.palmPosition());
 
             // Get the hand's normal vector and direction
             Vector normal = hand.palmNormal();
@@ -105,8 +119,9 @@ public class LeapListener extends Listener {
 
             // Calculate the hand's pitch, roll, and yaw angles
             System.out.println("Hand pitch: " + Math.toDegrees(direction.pitch()) + " degrees, "
-                             + "roll: " + Math.toDegrees(normal.roll()) + " degrees, "
-                             + "yaw: " + Math.toDegrees(direction.yaw()) + " degrees");
+                    + "roll: " + Math.toDegrees(normal.roll()) + " degrees, "
+                    + "yaw: " + Math.toDegrees(direction.yaw()) + " degrees");
+                    */
         }
 
         GestureList gestures = frame.gestures();
@@ -119,7 +134,7 @@ public class LeapListener extends Listener {
 
                     // Calculate clock direction using the angle between circle normal and pointable
                     String clockwiseness;
-                    if (circle.pointable().direction().angleTo(circle.normal()) <= Math.PI/4) {
+                    if (circle.pointable().direction().angleTo(circle.normal()) <= Math.PI / 4) {
                         // Clockwise if angle is less than 90 degrees
                         clockwiseness = "clockwise";
                     } else {
@@ -134,33 +149,33 @@ public class LeapListener extends Listener {
                     }
 
                     System.out.println("Circle id: " + circle.id()
-                               + ", " + circle.state()
-                               + ", progress: " + circle.progress()
-                               + ", radius: " + circle.radius()
-                               + ", angle: " + Math.toDegrees(sweptAngle)
-                               + ", " + clockwiseness);
+                            + ", " + circle.state()
+                            + ", progress: " + circle.progress()
+                            + ", radius: " + circle.radius()
+                            + ", angle: " + Math.toDegrees(sweptAngle)
+                            + ", " + clockwiseness);
                     break;
                 case TYPE_SWIPE:
                     SwipeGesture swipe = new SwipeGesture(gesture);
                     System.out.println("Swipe id: " + swipe.id()
-                               + ", " + swipe.state()
-                               + ", position: " + swipe.position()
-                               + ", direction: " + swipe.direction()
-                               + ", speed: " + swipe.speed());
+                            + ", " + swipe.state()
+                            + ", position: " + swipe.position()
+                            + ", direction: " + swipe.direction()
+                            + ", speed: " + swipe.speed());
                     break;
                 case TYPE_SCREEN_TAP:
                     ScreenTapGesture screenTap = new ScreenTapGesture(gesture);
                     System.out.println("Screen Tap id: " + screenTap.id()
-                               + ", " + screenTap.state()
-                               + ", position: " + screenTap.position()
-                               + ", direction: " + screenTap.direction());
+                            + ", " + screenTap.state()
+                            + ", position: " + screenTap.position()
+                            + ", direction: " + screenTap.direction());
                     break;
                 case TYPE_KEY_TAP:
                     KeyTapGesture keyTap = new KeyTapGesture(gesture);
                     System.out.println("Key Tap id: " + keyTap.id()
-                               + ", " + keyTap.state()
-                               + ", position: " + keyTap.position()
-                               + ", direction: " + keyTap.direction());
+                            + ", " + keyTap.state()
+                            + ", position: " + keyTap.position()
+                            + ", direction: " + keyTap.direction());
                     break;
                 default:
                     System.out.println("Unknown gesture type.");
@@ -172,5 +187,4 @@ public class LeapListener extends Listener {
             System.out.println();
         }
     }
-
 }
