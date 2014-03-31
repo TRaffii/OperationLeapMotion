@@ -89,22 +89,26 @@ public class LeapListener extends Listener {
                 int screenh = screen.heightPixels();
                 int posXi = (int) (intersection.get(0) * screenw);      // actual x position on your screen
                 int posYi = (int) (screenh - intersection.get(1) * screenh);
-
-                robot.mouseMove(posXi, posYi);
-                avgPos = avgPos.divide(fingers.count());
+                if(Main.getScreenFlag() != 2)
+                {
+                    robot.mouseMove(posXi, posYi);
+                    avgPos = avgPos.divide(fingers.count());
+                }
                 
             }
             if (fingers.count() == 2)//use finger as getter 
             {
                 int podziel = 30;
                 int pomnoz = 3;
-                System.out.println("R:"+(fingers.get(0).direction().roll()+FastMath.PI));
-                System.out.println("P:"+(fingers.get(0).direction().pitch()+FastMath.PI));
-                System.out.println("Y:"+(fingers.get(0).direction().yaw()+FastMath.PI));
-                Main.setThumbRotateVector(new Vector3f(fingers.get(0).direction().pitch()+FastMath.PI, fingers.get(0).direction().yaw()+FastMath.PI, (  fingers.get(0).direction().roll()+FastMath.PI)));
+                System.out.println("R:"+(fingers.get(0).direction().roll()));
+                System.out.println("P:"+(fingers.get(0).direction().pitch()));
+                System.out.println("Y:"+(fingers.get(0).direction().yaw()));
+                //Main.setThumbRotateVector(new Vector3f(fingers.get(0).direction().roll()-FastMath.HALF_PI,FastMath.PI- fingers.get(0).direction().yaw()+FastMath.PI, ( fingers.get(0).direction().roll()-FastMath.HALF_PI)));
+                //Main.setThumbRotateVector(new Vector3f(0,fingers.get(0).direction().roll(), 0));
+                Main.setThumbRotateVector(new Vector3f(fingers.get(0).direction().pitch(),FastMath.INV_TWO_PI - fingers.get(0).direction().yaw(), 0));
                 Main.setThumbVector(new Vector3f(fingers.get(0).tipPosition().getX()/podziel, (fingers.get(0).tipPosition().getY()-200)/podziel, fingers.get(0).tipPosition().getZ()/podziel));
-                
-                Main.setForeFingerRotateVector(new Vector3f(fingers.get(1).direction().pitch()+FastMath.PI, fingers.get(1).direction().yaw()+FastMath.PI, ( fingers.get(1).direction().roll()+FastMath.PI)));
+           
+                Main.setForeFingerRotateVector(new Vector3f(fingers.get(1).direction().pitch(),FastMath.INV_TWO_PI -fingers.get(1).direction().yaw(),0 ));
                 Main.setForeFingerVector(new Vector3f((fingers.get(1).tipPosition().getX()+30)/podziel, (fingers.get(1).tipPosition().getY()-200)/podziel, fingers.get(1).tipPosition().getZ()/podziel));
                
             }

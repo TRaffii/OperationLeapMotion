@@ -58,6 +58,7 @@ public class Main extends SimpleApplication {
     //Material
     Material floor_mat;
     LeapListener listener;
+   
     private RigidBodyControl brick_phy;
     Geometry pointer1;
     float global = 0;
@@ -74,7 +75,15 @@ public class Main extends SimpleApplication {
     static Vector3f thumbVector = new Vector3f();
     static Vector3f thumbRotateVector = new Vector3f();
     static Vector3f foreFingerRotateVector = new Vector3f();
-    
+    static int screenFlag = 0;
+
+    public static int getScreenFlag() {
+        return screenFlag;
+    }
+
+    public static void setScreenFlag(int screenFlag) {
+        Main.screenFlag = screenFlag;
+    }
     public static Vector3f getThumbRotateVector() {
         return thumbRotateVector;
     }
@@ -295,19 +304,28 @@ private AnalogListener analogListener = new AnalogListener() {
         
         // make the player rotate:
         Vector3f temp = getThumbRotateVector().mult(new Vector3f(0, 0, 1));
-        //Quaternion qat =  new Quaternion(getThumbRotateVector().toArray(null));
-        Quaternion qat = new Quaternion().fromAngles(getThumbRotateVector().x, getThumbRotateVector().y, getThumbRotateVector().z);
+       // Quaternion qat =  new Quaternion(getThumbRotateVector().toArray(null));
+        Quaternion quat1 = new Quaternion().fromAngles(getThumbRotateVector().x, getThumbRotateVector().y,0 );
+        Quaternion quat2 = new Quaternion().fromAngles(getForeFingerRotateVector().x, getForeFingerRotateVector().y,0 );
         //Quaternion qat =  new Quaternion().fromAngleAxis(90*FastMath.DEG_TO_RAD, getThumbRotateVector());
         //Quaternion qat =  new Quaternion().fromAngleAxis(getThumbRotateVector().x, new Vector3f(1,-1,0));
         //System.out.println(qat);
-        // Quaternion qat =  new Quaternion().fromAngleAxis(getThumbRotateVector().x, new Vector3f(1,0,0));
-        //Quaternion qat2 =  new Quaternion().fromAngleAxis(getThumbRotateVector().z, new Vector3f(0,0,1));
+        //Quaternion qat =  new Quaternion().fromAngleAxis(getThumbRotateVector().x, new Vector3f(1,0,0));
+        //Quaternion qat =  new Quaternion().fromAngles(getThumbRotateVector().x, getThumbRotateVector().y, 0);
+        //Quaternion qat2 =  new Quaternion().fromAngleAxis(getThumbRotateVector().y, new Vector3f(0,1,0));
+        //Quaternion qat = new  Quaternion().fromAngles(getThumbRotateVector().x, getThumbRotateVector().y, getThumbRotateVector().z);
+        //qat = qat.mult(qat2);
         //pointer1.setLocalRotation(qat);
+       // pointer1.setLocalRotation(qat2);
+        
+     
+        
+        pointer1.setLocalRotation(quat1);
         //pointer1.setLocalRotation(qat2);
         //pointer1.setLocalRotation(new Quaternion().fromAngleAxis(getThumbRotateVector().y, new Vector3f(0,0,1)));
         pointer1.setLocalTranslation(getThumbVector());
 
-        //pointer2.setLocalRotation( new Quaternion().fromAngleAxis(getForeFingerRotateVector().x, new Vector3f(1,0,0)));
+        pointer2.setLocalRotation(quat2);
         //pointer2.setLocalRotation( new Quaternion().fromAngleAxis(getForeFingerRotateVector().z, new Vector3f(0,0,1)));
         pointer2.setLocalTranslation(getForeFingerVector());
         //geom.rotate( 0f , 0.002f , 0f );
