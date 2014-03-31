@@ -24,7 +24,9 @@ public class MainGameWindowController extends AbstractAppState implements Screen
 
     public void onStartScreen() {
          /** Add fog to a scene */
-     
+        
+     Main.getApp().getInputManager().setCursorVisible(false);
+     Main.getApp().getFlyByCamera().setDragToRotate(false);
 /* A colored lit cube. Needs light source! */ 
           
        }
