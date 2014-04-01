@@ -105,11 +105,11 @@ public class LeapListener extends Listener {
                 System.out.println("Y:"+(fingers.get(0).direction().yaw()));
                 //Main.setThumbRotateVector(new Vector3f(fingers.get(0).direction().roll()-FastMath.HALF_PI,FastMath.PI- fingers.get(0).direction().yaw()+FastMath.PI, ( fingers.get(0).direction().roll()-FastMath.HALF_PI)));
                 //Main.setThumbRotateVector(new Vector3f(0,fingers.get(0).direction().roll(), 0));
-                Main.setThumbRotateVector(new Vector3f(fingers.get(0).direction().pitch(),FastMath.INV_TWO_PI - fingers.get(0).direction().yaw(), 0));
-                Main.setThumbVector(new Vector3f(fingers.get(0).tipPosition().getX()/podziel, (fingers.get(0).tipPosition().getY()-200)/podziel, fingers.get(0).tipPosition().getZ()/podziel));
+                Main.setThumbRotateVector(new Vector3f(fingers.get(0).direction().pitch(),-fingers.get(0).direction().yaw(), 0));
+                Main.setThumbVector(new Vector3f(-fingers.get(0).tipPosition().getX()/podziel, (fingers.get(0).tipPosition().getY()-200)/podziel, -fingers.get(0).tipPosition().getZ()/podziel));
            
-                Main.setForeFingerRotateVector(new Vector3f(fingers.get(1).direction().pitch(),FastMath.INV_TWO_PI -fingers.get(1).direction().yaw(),0 ));
-                Main.setForeFingerVector(new Vector3f((fingers.get(1).tipPosition().getX()+30)/podziel, (fingers.get(1).tipPosition().getY()-200)/podziel, fingers.get(1).tipPosition().getZ()/podziel));
+                Main.setForeFingerRotateVector(new Vector3f(fingers.get(1).direction().pitch(), -fingers.get(1).direction().yaw(),0 ));
+                Main.setForeFingerVector(new Vector3f((-fingers.get(1).tipPosition().getX())/podziel, (fingers.get(1).tipPosition().getY()-200)/podziel, -fingers.get(1).tipPosition().getZ()/podziel));
                
             }
             /*

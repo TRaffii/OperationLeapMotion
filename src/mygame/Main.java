@@ -11,6 +11,8 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.PhysicsCollisionEvent;
+import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.font.BitmapText;
 import com.jme3.input.FlyByCamera;
@@ -50,7 +52,7 @@ import tonegod.gui.core.Screen;
  * Sample 7 - how to load an OgreXML model and play an animation, using
  * channels, a controller, and an AnimEventListener.
  */
-public class Main extends SimpleApplication {
+public class Main extends SimpleApplication implements PhysicsCollisionListener {
     // Create a sample listener and controller
 
     //physix
@@ -60,6 +62,9 @@ public class Main extends SimpleApplication {
     LeapListener listener;
    
     private RigidBodyControl brick_phy;
+    private RigidBodyControl toolLeft;
+    private RigidBodyControl toolRight;
+ 
     Geometry pointer1;
     float global = 0;
     Geometry pointer2;
@@ -156,11 +161,15 @@ public class Main extends SimpleApplication {
     public void simpleInitApp() {
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
+        bulletAppState.getPhysicsSpace().addCollisionListener(this);
+        
+        
         pickables = new Node("Pickables");
         tools = new Node("Tools");
         rootNode.attachChild(pickables);
         rootNode.attachChild(tools);
         cam.setLocation(new Vector3f(0, 3f, 12f));
+        flyCam.setMoveSpeed(10);
         inputManager.addMapping("pick up",   new  MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addListener(analogListener, "pick up");
         floor = new Box(10f, 0.1f, 5f);
@@ -179,15 +188,29 @@ public class Main extends SimpleApplication {
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         Material mat3 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        
+        
         mat.setColor("Color", ColorRGBA.Pink);
         mat2.setColor("Color", ColorRGBA.Blue);
         mat3.setColor("Color", ColorRGBA.Orange);
+        
+        
         pointer1.setMaterial(mat);
         pointer2.setMaterial(mat2);
         pickUpBox1.setMaterial(mat3);
+        
+        
         brick_phy = new RigidBodyControl(2f);
+        toolLeft = new RigidBodyControl(0f);
+        toolRight = new RigidBodyControl(0f);
+        
         pickUpBox1.addControl(brick_phy);
+        pointer1.addControl(toolLeft);
+        pointer2.addControl(toolRight);
         bulletAppState.getPhysicsSpace().add(brick_phy);
+        bulletAppState.getPhysicsSpace().add(toolLeft);
+        bulletAppState.getPhysicsSpace().add(toolRight);
+        bulletAppState.getPhysicsSpace().enableDebug(assetManager);
         pickUpBox1.setLocalTranslation(0, 0, -1);
         tools.attachChild(pointer1);
         tools.attachChild(pointer2);
@@ -199,6 +222,7 @@ public class Main extends SimpleApplication {
 
         //Leap motion section
         controller.addListener(listener);
+        
 
         //      DirectionalLight sun = new DirectionalLight();
         //      sun.setDirection((new Vector3f(-0.1f,-0.7f,-1.0f)));
@@ -320,16 +344,24 @@ private AnalogListener analogListener = new AnalogListener() {
         
      
         
-        pointer1.setLocalRotation(quat1);
+//        pointer1.setLocalRotation(quat1);
+        
+        toolLeft.setPhysicsLocation(cam.getRotation().mult(getThumbVector()));//during camera rotation recalculating hand position
+        System.out.println(cam.getRotation().getZ());
+        toolLeft.setPhysicsRotation(quat1.mult(cam.getRotation()));
         //pointer1.setLocalRotation(qat2);
         //pointer1.setLocalRotation(new Quaternion().fromAngleAxis(getThumbRotateVector().y, new Vector3f(0,0,1)));
-        pointer1.setLocalTranslation(getThumbVector());
-
-        pointer2.setLocalRotation(quat2);
+//        pointer1.setLocalTranslation(getThumbVector());
+        
+//        pointer2.setLocalRotation(quat2);
         //pointer2.setLocalRotation( new Quaternion().fromAngleAxis(getForeFingerRotateVector().z, new Vector3f(0,0,1)));
-        pointer2.setLocalTranslation(getForeFingerVector());
+//        pointer2.setLocalTranslation(getForeFingerVector());
+        
+        toolRight.setPhysicsLocation(cam.getRotation().mult(getForeFingerVector()));
+        toolRight.setPhysicsRotation(quat2.mult(cam.getRotation()));
         //geom.rotate( 0f , 0.002f , 0f );
         // 1. Reset results list.
+        
         CollisionResults results = new CollisionResults();
         // 2. Aim the ray from cam loc to cam direction.
 
@@ -337,9 +369,14 @@ private AnalogListener analogListener = new AnalogListener() {
         tools.collideWith(test, results);
 
         // 4. Print the results
-        System.out.println("----- Collisions? " + results.size() + "-----");
+       
         if (results.size() > 0) {
-            pickUpBox1.setLocalTranslation(0, 0, getForeFingerVector().z + 0.3f);
+             System.out.println("----- Collisions? " + results.size() + "-----");
+//            pickUpBox1.setLocalTranslation(0, 0, getForeFingerVector().z + 0.3f);
         }
+    }
+
+    public void collision(PhysicsCollisionEvent event) {
+        System.out.println("collision4");
     }
 }
