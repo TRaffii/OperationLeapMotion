@@ -75,6 +75,7 @@ public class Main extends SimpleApplication  {
     AudioNode music;
     private Node pickables;
     private Node tools;
+    private Node tableNode;
     private RigidBodyControl floor_phy;
     private Box floor;
     static Vector3f thumbVector = new Vector3f();
@@ -160,7 +161,7 @@ public class Main extends SimpleApplication  {
         Geometry floor_geo = new Geometry("Floor", floor);
         floor_geo.setMaterial(floor_mat);
         floor_geo.setLocalTranslation(0, -0.1f, 0);
-        this.rootNode.attachChild(floor_geo);
+        tableNode.attachChild(floor_geo);
         /* Make the floor physical with mass 0.0f! */
         floor_phy = new RigidBodyControl(0.0f);
         floor_geo.addControl(floor_phy);
@@ -184,8 +185,10 @@ public class Main extends SimpleApplication  {
         
         pickables = new Node("Pickables");
         tools = new Node("Tools");
+        tableNode = new Node("Table");
         rootNode.attachChild(pickables);
         rootNode.attachChild(tools);
+        rootNode.attachChild(tableNode);
         setCameraPositionXYZ(new Vector3f(0, 3f, 12f));
         flyCam.setMoveSpeed(10);
         inputManager.addMapping("pick up",   new  MouseButtonTrigger(MouseInput.BUTTON_LEFT));
@@ -346,10 +349,12 @@ private AnalogListener analogListener = new AnalogListener() {
     public void simpleUpdate(float tpf) {
         
         //Camera rotation by left hand RPY
-        Quaternion qatRotationCamera =  new Quaternion().fromAngles(getCameraRotationRPY().x, getCameraRotationRPY().y, getCameraRotationRPY().z);
+        Quaternion qatRotationCamera =  new Quaternion().fromAngles(getCameraRotationRPY().x, 0, getCameraRotationRPY().z);
+        Quaternion qatRotationCameraLocal =  new Quaternion().fromAngles(0, getCameraRotationRPY().y, 0);
         cam.setRotation(qatRotationCamera);
+        System.out.println(cam.getRotation());
         cam.setLocation(getCameraPositionXYZ());
-        
+        tableNode.setLocalRotation(qatRotationCameraLocal);
         
         // make the player rotate:
         Vector3f temp = getThumbRotateVector().mult(new Vector3f(0, 0, 1));

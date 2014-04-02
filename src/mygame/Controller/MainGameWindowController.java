@@ -12,6 +12,7 @@ import de.lessvoid.nifty.controls.TextFieldChangedEvent;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import mygame.Main;
+import static mygame.Main.getCameraRotationRPY;
 
 /**
  *
@@ -34,7 +35,7 @@ public class MainGameWindowController extends AbstractAppState implements Screen
     public void onChange(String id, TextFieldChangedEvent event) {
         System.out.println(id);
         Float val = Float.parseFloat(event.getText());
-        Vector3f temp = Main.getThumbRotateVector();
+        Vector3f temp = Main.getCameraRotationRPY();
         if ("GTextfield2".equals(id )) {
             temp.x = val;
         }
@@ -44,7 +45,7 @@ public class MainGameWindowController extends AbstractAppState implements Screen
         else if ("GTextfield5".equals(id )) {
            temp.z = val;
         }
-        Main.setThumbRotateVector(temp);
+        Main.setCameraRotationRPY(temp);
     /*
         Float val = Float.parseFloat(event.getText());
         Vector3f temp = Main.getForeFingerVector();

@@ -114,7 +114,7 @@ public class LeapListener extends Listener {
             if (frame.hands().count() > 1) {
 
                 Hand handCameraControl = frame.hands().leftmost();
-                System.out.println(handCameraControl.sphereRadius());
+                System.out.println("YAXIS"+(handCameraControl.palmPosition().getX()/50)%6.28);
                 if (handCameraControl.fingers().count() > 2) {
                     int podziel = 30;
                     System.out.println("ROLL:" + (handCameraControl.direction().roll()));
@@ -123,7 +123,8 @@ public class LeapListener extends Listener {
                    // Main.setCameraRotationRPY(new Vector3f(FastMath.HALF_PI - handCameraControl.direction().roll(), (float) ((handCameraControl.palmPosition().getX()/50)%6.28), 0));
                     
                     
-                        Main.setCameraRotationRPY(new Vector3f(FastMath.QUARTER_PI, (float) ((handCameraControl.palmPosition().getX()/50)%6.28), 0));
+//                        Main.setCameraRotationRPY(new Vector3f((float) (-(handCameraControl.palmPosition().getY()/40)%6.28), (float) -((handCameraControl.palmPosition().getX()/40)%6.28), 0));
+                        Main.setCameraRotationRPY(new Vector3f( (float) (FastMath.HALF_PI-(handCameraControl.palmPosition().getY()/40)%6.28), (float) ((handCameraControl.palmPosition().getX()/50)%6.28), FastMath.PI));
                    
                     
                     Vector3f newPositionVectorXYZ = new Vector3f(handCameraControl.palmPosition().getX() / podziel, handCameraControl.palmPosition().getY() / podziel, 
@@ -131,6 +132,8 @@ public class LeapListener extends Listener {
                    
                     Main.setCameraPositionXYZ(new Vector3f(handCameraControl.palmPosition().getX() / podziel, handCameraControl.palmPosition().getY() / podziel, 
                             (handCameraControl.palmPosition().getZ() + 100) / podziel));
+//                    Main.setCameraPositionXYZ(new Vector3f(0, 0, 
+//                            (handCameraControl.palmPosition().getZ() + 100) / podziel));
                     
                 }
             }
