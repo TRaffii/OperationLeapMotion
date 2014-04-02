@@ -52,7 +52,7 @@ import tonegod.gui.core.Screen;
  * Sample 7 - how to load an OgreXML model and play an animation, using
  * channels, a controller, and an AnimEventListener.
  */
-public class Main extends SimpleApplication implements PhysicsCollisionListener {
+public class Main extends SimpleApplication  {
     // Create a sample listener and controller
 
     //physix
@@ -80,6 +80,24 @@ public class Main extends SimpleApplication implements PhysicsCollisionListener 
     static Vector3f thumbVector = new Vector3f();
     static Vector3f thumbRotateVector = new Vector3f();
     static Vector3f foreFingerRotateVector = new Vector3f();
+    static Vector3f cameraRotationRPY = new Vector3f(Vector3f.ZERO);
+    static Vector3f cameraPositionXYZ = new Vector3f(Vector3f.ZERO);
+
+    public static Vector3f getCameraPositionXYZ() {
+        return cameraPositionXYZ;
+    }
+
+    public static void setCameraPositionXYZ(Vector3f cameraPositionXYZ) {
+        Main.cameraPositionXYZ = cameraPositionXYZ;
+    }
+
+    public static Vector3f getCameraRotationRPY() {
+        return cameraRotationRPY;
+    }
+
+    public static void setCameraRotationRPY(Vector3f cameraRotationRPY) {
+        Main.cameraRotationRPY = cameraRotationRPY;
+    }
     static int screenFlag = 0;
 
     public static int getScreenFlag() {
@@ -161,14 +179,14 @@ public class Main extends SimpleApplication implements PhysicsCollisionListener 
     public void simpleInitApp() {
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
-        bulletAppState.getPhysicsSpace().addCollisionListener(this);
+        
         
         
         pickables = new Node("Pickables");
         tools = new Node("Tools");
         rootNode.attachChild(pickables);
         rootNode.attachChild(tools);
-        cam.setLocation(new Vector3f(0, 3f, 12f));
+        setCameraPositionXYZ(new Vector3f(0, 3f, 12f));
         flyCam.setMoveSpeed(10);
         inputManager.addMapping("pick up",   new  MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addListener(analogListener, "pick up");
@@ -278,6 +296,7 @@ private AnalogListener analogListener = new AnalogListener() {
  
       if (name.equals("pick up")) {         // test?
  //        brick_phy.setPhysicsLocation(new Vector3f(0, 4f, 0));
+        
 //        if(!brick_phy.isActive())
 //            brick_phy.activate();
          CollisionResults results = new CollisionResults();
@@ -326,6 +345,12 @@ private AnalogListener analogListener = new AnalogListener() {
     @Override
     public void simpleUpdate(float tpf) {
         
+        //Camera rotation by left hand RPY
+        Quaternion qatRotationCamera =  new Quaternion().fromAngles(getCameraRotationRPY().x, getCameraRotationRPY().y, getCameraRotationRPY().z);
+        cam.setRotation(qatRotationCamera);
+        cam.setLocation(getCameraPositionXYZ());
+        
+        
         // make the player rotate:
         Vector3f temp = getThumbRotateVector().mult(new Vector3f(0, 0, 1));
        // Quaternion qat =  new Quaternion(getThumbRotateVector().toArray(null));
@@ -347,7 +372,6 @@ private AnalogListener analogListener = new AnalogListener() {
 //        pointer1.setLocalRotation(quat1);
         
         toolLeft.setPhysicsLocation(cam.getRotation().mult(getThumbVector()));//during camera rotation recalculating hand position
-        System.out.println(cam.getRotation().getZ());
         toolLeft.setPhysicsRotation(quat1.mult(cam.getRotation()));
         //pointer1.setLocalRotation(qat2);
         //pointer1.setLocalRotation(new Quaternion().fromAngleAxis(getThumbRotateVector().y, new Vector3f(0,0,1)));
@@ -364,7 +388,7 @@ private AnalogListener analogListener = new AnalogListener() {
         
         CollisionResults results = new CollisionResults();
         // 2. Aim the ray from cam loc to cam direction.
-
+       
         // 3. Collect intersections between Ray and Shootables in results list.
         tools.collideWith(test, results);
 
@@ -374,9 +398,8 @@ private AnalogListener analogListener = new AnalogListener() {
              System.out.println("----- Collisions? " + results.size() + "-----");
 //            pickUpBox1.setLocalTranslation(0, 0, getForeFingerVector().z + 0.3f);
         }
+        
     }
 
-    public void collision(PhysicsCollisionEvent event) {
-        System.out.println("collision4");
-    }
+   
 }

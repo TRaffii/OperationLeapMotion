@@ -60,22 +60,22 @@ public class LeapListener extends Listener {
     public void onFrame(Controller controller) {
         // Get the most recent frame and report some basic information
         Frame frame = controller.frame();
-       /*
-        System.out.println("Frame id: " + frame.id()
-                + ", timestamp: " + frame.timestamp()
-                + ", hands: " + frame.hands().count()
-                + ", fingers: " + frame.fingers().count()
-                + ", tools: " + frame.tools().count()
-                + ", gestures " + frame.gestures().count());
-                * */
+        /*
+         System.out.println("Frame id: " + frame.id()
+         + ", timestamp: " + frame.timestamp()
+         + ", hands: " + frame.hands().count()
+         + ", fingers: " + frame.fingers().count()
+         + ", tools: " + frame.tools().count()
+         + ", gestures " + frame.gestures().count());
+         * */
         if (!frame.hands().isEmpty()) {
             // Get the first hand
-            Hand hand = frame.hands().get(0);
+            Hand hand = frame.hands().rightmost();
 
             // Check if the hand has any fingers
             FingerList fingers = hand.fingers();
-            
-            if (fingers.count() >0) { //use finger as mouse pointer
+
+            if (fingers.count() > 0) { //use finger as mouse pointer
                 // Calculate the hand's average finger tip position
                 Vector avgPos = Vector.zero();
                 for (Finger finger : fingers) {
@@ -89,43 +89,65 @@ public class LeapListener extends Listener {
                 int screenh = screen.heightPixels();
                 int posXi = (int) (intersection.get(0) * screenw);      // actual x position on your screen
                 int posYi = (int) (screenh - intersection.get(1) * screenh);
-                if(Main.getScreenFlag() != 2)
-                {
+                if (Main.getScreenFlag() != 2) {
                     robot.mouseMove(posXi, posYi);
                     avgPos = avgPos.divide(fingers.count());
                 }
-                
+
             }
             if (fingers.count() == 2)//use finger as getter 
             {
                 int podziel = 30;
                 int pomnoz = 3;
-                System.out.println("R:"+(fingers.get(0).direction().roll()));
-                System.out.println("P:"+(fingers.get(0).direction().pitch()));
-                System.out.println("Y:"+(fingers.get(0).direction().yaw()));
+//                System.out.println("R:"+(fingers.get(0).direction().roll()));
+//                System.out.println("P:"+(fingers.get(0).direction().pitch()));
+//                System.out.println("Y:"+(fingers.get(0).direction().yaw()));
                 //Main.setThumbRotateVector(new Vector3f(fingers.get(0).direction().roll()-FastMath.HALF_PI,FastMath.PI- fingers.get(0).direction().yaw()+FastMath.PI, ( fingers.get(0).direction().roll()-FastMath.HALF_PI)));
                 //Main.setThumbRotateVector(new Vector3f(0,fingers.get(0).direction().roll(), 0));
-                Main.setThumbRotateVector(new Vector3f(fingers.get(0).direction().pitch(),-fingers.get(0).direction().yaw(), 0));
-                Main.setThumbVector(new Vector3f(-fingers.get(0).tipPosition().getX()/podziel, (fingers.get(0).tipPosition().getY()-200)/podziel, -fingers.get(0).tipPosition().getZ()/podziel));
-           
-                Main.setForeFingerRotateVector(new Vector3f(fingers.get(1).direction().pitch(), -fingers.get(1).direction().yaw(),0 ));
-                Main.setForeFingerVector(new Vector3f((-fingers.get(1).tipPosition().getX())/podziel, (fingers.get(1).tipPosition().getY()-200)/podziel, -fingers.get(1).tipPosition().getZ()/podziel));
-               
+                Main.setThumbRotateVector(new Vector3f(fingers.get(0).direction().pitch(), -fingers.get(0).direction().yaw(), 0));
+                Main.setThumbVector(new Vector3f(-fingers.get(0).tipPosition().getX() / podziel, (fingers.get(0).tipPosition().getY() - 200) / podziel, -fingers.get(0).tipPosition().getZ() / podziel));
+
+                Main.setForeFingerRotateVector(new Vector3f(fingers.get(1).direction().pitch(), -fingers.get(1).direction().yaw(), 0));
+                Main.setForeFingerVector(new Vector3f((-fingers.get(1).tipPosition().getX()) / podziel, (fingers.get(1).tipPosition().getY() - 200) / podziel, -fingers.get(1).tipPosition().getZ() / podziel));
+
+            }
+            if (frame.hands().count() > 1) {
+
+                Hand handCameraControl = frame.hands().leftmost();
+                System.out.println(handCameraControl.sphereRadius());
+                if (handCameraControl.fingers().count() > 2) {
+                    int podziel = 30;
+                    System.out.println("ROLL:" + (handCameraControl.direction().roll()));
+                    System.out.println("PITCH:" + (handCameraControl.palmPosition().pitch()));
+                    System.out.println("Z:" + (handCameraControl.palmPosition().getZ() / podziel));
+                   // Main.setCameraRotationRPY(new Vector3f(FastMath.HALF_PI - handCameraControl.direction().roll(), (float) ((handCameraControl.palmPosition().getX()/50)%6.28), 0));
+                    
+                    
+                        Main.setCameraRotationRPY(new Vector3f(FastMath.QUARTER_PI, (float) ((handCameraControl.palmPosition().getX()/50)%6.28), 0));
+                   
+                    
+                    Vector3f newPositionVectorXYZ = new Vector3f(handCameraControl.palmPosition().getX() / podziel, handCameraControl.palmPosition().getY() / podziel, 
+                            (handCameraControl.palmPosition().getZ() + 100) / podziel);
+                   
+                    Main.setCameraPositionXYZ(new Vector3f(handCameraControl.palmPosition().getX() / podziel, handCameraControl.palmPosition().getY() / podziel, 
+                            (handCameraControl.palmPosition().getZ() + 100) / podziel));
+                    
+                }
             }
             /*
-            // Get the hand's sphere radius and palm position
-            System.out.println("Hand sphere radius: " + hand.sphereRadius()
-                    + " mm, palm position: " + hand.palmPosition());
+             // Get the hand's sphere radius and palm position
+             System.out.println("Hand sphere radius: " + hand.sphereRadius()
+             + " mm, palm position: " + hand.palmPosition());
 
-            // Get the hand's normal vector and direction
-            Vector normal = hand.palmNormal();
-            Vector direction = hand.direction();
+             // Get the hand's normal vector and direction
+             Vector normal = hand.palmNormal();
+             Vector direction = hand.direction();
 
-            // Calculate the hand's pitch, roll, and yaw angles
-            System.out.println("Hand pitch: " + Math.toDegrees(direction.pitch()) + " degrees, "
-                    + "roll: " + Math.toDegrees(normal.roll()) + " degrees, "
-                    + "yaw: " + Math.toDegrees(direction.yaw()) + " degrees");
-                    */
+             // Calculate the hand's pitch, roll, and yaw angles
+             System.out.println("Hand pitch: " + Math.toDegrees(direction.pitch()) + " degrees, "
+             + "roll: " + Math.toDegrees(normal.roll()) + " degrees, "
+             + "yaw: " + Math.toDegrees(direction.yaw()) + " degrees");
+             */
         }
 
         GestureList gestures = frame.gestures();
