@@ -13,6 +13,9 @@
         - zapisywanie użytkownika - - done zajęcia nr 2 (dodanie przycisku)
 4.  Obsługa gry:
     a) Przechwytywanie rąk jako kontrolera
+    b) Wykorzystanie lewej ręki do obracania 
+        - rotacja chwytaka w stosunku do obrotu kamery
+        - kąty eulera,kwateriony i inna matematyka. ...
     b) logika gry
 5.	Wątki:
     a) Obsługa kontrolera w tle(obsługa myszki)
