@@ -64,7 +64,7 @@ public class Main extends SimpleApplication  {
     private RigidBodyControl brick_phy;
     private RigidBodyControl toolLeft;
     private RigidBodyControl toolRight;
- 
+    
     Geometry pointer1;
     float global = 0;
     Geometry pointer2;
@@ -192,7 +192,9 @@ public class Main extends SimpleApplication  {
         setCameraPositionXYZ(new Vector3f(0, 3f, 12f));
         flyCam.setMoveSpeed(10);
         inputManager.addMapping("pick up",   new  MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addMapping("reset",   new  KeyTrigger(KeyInput.KEY_SPACE));
         inputManager.addListener(analogListener, "pick up");
+        inputManager.addListener(analogListener, "reset");
         floor = new Box(10f, 0.1f, 5f);
         //floor.scaleTextureCoordinates(new Vector2f(1, 2));
         initMaterials();
@@ -221,7 +223,8 @@ public class Main extends SimpleApplication  {
         pickUpBox1.setMaterial(mat3);
         
         
-        brick_phy = new RigidBodyControl(2f);
+        brick_phy = new RigidBodyControl(10f);
+       
         toolLeft = new RigidBodyControl(0f);
         toolRight = new RigidBodyControl(0f);
         
@@ -240,7 +243,7 @@ public class Main extends SimpleApplication  {
         listener = new LeapListener(this.settings.getWidth(), this.settings.getHeight());
         SettingsIO settingFile = new SettingsIO("assets/Settings/ProgramSettings.xml");
         /* A colored lit cube. Needs light source! */
-
+         brick_phy.setKinematic(false);
         //Leap motion section
         controller.addListener(listener);
         
@@ -322,14 +325,30 @@ private AnalogListener analogListener = new AnalogListener() {
            Geometry target = results.getClosestCollision().getGeometry();
            // Here comes the action:
            Vector3f pt = results.getCollision(0).getContactPoint();
+           pt.z = 0;
+           if(pt.y<0)//dont fall down
+           {
+               pt.y =0;
+           }
            target.getControl(RigidBodyControl.class).setPhysicsLocation(pt);
+           //target.getControl(RigidBodyControl.class).setPhysicsRotation(Matrix3f.ZERO);
            if(!target.getControl(RigidBodyControl.class).isActive())
            {
                target.getControl(RigidBodyControl.class).activate();
            }
          }
       } 
- 
+     if (name.equals("reset")) { 
+          brick_phy.clearForces();
+          brick_phy.setPhysicsRotation(Matrix3f.ZERO);
+          brick_phy.setPhysicsLocation(new Vector3f(1f, 0.5f, 0));
+          if(!brick_phy.isActive() )
+          {
+                
+                brick_phy.activate();
+               
+          }
+     }
     
  
     }
@@ -348,6 +367,7 @@ private AnalogListener analogListener = new AnalogListener() {
     @Override
     public void simpleUpdate(float tpf) {
         
+        /*
         //Camera rotation by left hand RPY
         Quaternion qatRotationCamera =  new Quaternion().fromAngles(getCameraRotationRPY().x, 0, getCameraRotationRPY().z);
         Quaternion qatRotationCameraLocal =  new Quaternion().fromAngles(0, getCameraRotationRPY().y, 0);
@@ -390,7 +410,7 @@ private AnalogListener analogListener = new AnalogListener() {
         toolRight.setPhysicsRotation(quat2.mult(cam.getRotation()));
         //geom.rotate( 0f , 0.002f , 0f );
         // 1. Reset results list.
-        
+        */
         CollisionResults results = new CollisionResults();
         // 2. Aim the ray from cam loc to cam direction.
        
@@ -400,7 +420,7 @@ private AnalogListener analogListener = new AnalogListener() {
         // 4. Print the results
        
         if (results.size() > 0) {
-             System.out.println("----- Collisions? " + results.size() + "-----");
+         //    System.out.println("----- Collisions? " + results.size() + "-----");
 //            pickUpBox1.setLocalTranslation(0, 0, getForeFingerVector().z + 0.3f);
         }
         

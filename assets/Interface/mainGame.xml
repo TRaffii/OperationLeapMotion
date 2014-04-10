@@ -6,11 +6,11 @@ and open the template in the editor.
 <nifty>
 <screen id="mainGame"  controller="mygame.Controller.MainGameWindowController">
        <layer id="GLayer0" childLayout="absolute">
-            <control name="textfield" id="GTextfield2"  height="42px" width="173px" y="11" x="7">
+          <!--  <control name="textfield" id="GTextfield2"  height="42px" width="173px" y="11" x="7">
                  <interact onChange="vector(x)" />
             </control>
             <control name="textfield" id="GTextfield4" height="39px" width="167px" y="75" x="8"/>
-            <control name="textfield" id="GTextfield5" height="36px" width="170px" y="134" x="8"/>
+            <control name="textfield" id="GTextfield5" height="36px" width="170px" y="134" x="8"/> -->
         </layer>
   </screen>
 </nifty>
