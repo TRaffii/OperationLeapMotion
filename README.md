@@ -12,11 +12,13 @@
         - wyświetlanie użytkowników (ranking) -  done zajęcia nr 2
         - zapisywanie użytkownika - - done zajęcia nr 2 (dodanie przycisku)
 4.  Obsługa gry:
-    a) Przechwytywanie rąk jako kontrolera
-    b) Wykorzystanie lewej ręki do obracania 
+    a) Przechwytywanie rąk jako kontrolera - done zajecia nr 3 
+    b) Wykorzystanie lewej ręki do obracania  - half done - problem z powrotem do stanu startowego zajecia nr 3
         - rotacja chwytaka w stosunku do obrotu kamery
-        - kąty eulera,kwateriony i inna matematyka. ...
-    b) logika gry
+        - kąty eulera,kwateriony i inna matematyka. ...  - chyba done
+    c) wykrywanie kolizji - done zajecia nr 4
+    d) wprowadzenie fizyki -  done zajecia nr 4
+    e) obsluga myszki i klawiatury  do testow( IO) - done zajecia nr 4  
 5.	Wątki:
     a) Obsługa kontrolera w tle(obsługa myszki)
     b) Animacje (?)
