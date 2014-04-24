@@ -10,9 +10,11 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.bounding.BoundingBox;
+import com.jme3.bounding.BoundingVolume;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
 import com.jme3.bullet.collision.PhysicsCollisionListener;
+import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.font.BitmapText;
 import com.jme3.input.FlyByCamera;
@@ -24,11 +26,13 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
+import com.jme3.math.Triangle;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
@@ -36,6 +40,7 @@ import com.jme3.texture.Texture;
 import com.jme3.util.SkyFactory;
 import com.leapmotion.leap.Controller;
 import de.lessvoid.nifty.Nifty;
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
@@ -52,7 +57,7 @@ import tonegod.gui.core.Screen;
  * Sample 7 - how to load an OgreXML model and play an animation, using
  * channels, a controller, and an AnimEventListener.
  */
-public class Main extends SimpleApplication  {
+public class Main extends SimpleApplication {
     // Create a sample listener and controller
 
     //physix
@@ -60,7 +65,9 @@ public class Main extends SimpleApplication  {
     //Material
     Material floor_mat;
     LeapListener listener;
-   
+    boolean isLeftPointerInCollision = false;
+    boolean isRightPointerInCollision = false;
+    long timeSpan = Calendar.getInstance().getTimeInMillis();
     private RigidBodyControl brick_phy;
     private RigidBodyControl toolLeft;
     private RigidBodyControl toolRight;
@@ -180,9 +187,6 @@ public class Main extends SimpleApplication  {
     public void simpleInitApp() {
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
-        
-        
-        
         pickables = new Node("Pickables");
         tools = new Node("Tools");
         tableNode = new Node("Table");
@@ -196,7 +200,6 @@ public class Main extends SimpleApplication  {
         inputManager.addListener(analogListener, "pick up");
         inputManager.addListener(analogListener, "reset");
         floor = new Box(10f, 0.1f, 5f);
-        //floor.scaleTextureCoordinates(new Vector2f(1, 2));
         initMaterials();
         initFloor();
         Arrow arrow = new Arrow(new Vector3f(0, 2, 2));
@@ -204,10 +207,10 @@ public class Main extends SimpleApplication  {
         //Box b = new Box(1,1,1);
         Box b1 = new Box(0.1f, 0.1f, 3);
         Box b2 = new Box(0.1f, 0.1f, 3);
-        Box pickUp1 = new Box(0.3f, 0.3f, 0.3f);
-        pickUpBox1 = new Geometry("PickUp1", pickUp1);
-        pointer1 = new Geometry("Box", b1);
-        pointer2 = new Geometry("Box", b2);
+        Box pickUp1 = new Box(0.5f, 0.5f, 0.5f);
+        pickUpBox1 = new Geometry("Brick 1", pickUp1);
+        pointer1 = new Geometry("Pointer Left", b1);
+        pointer2 = new Geometry("Pointer Right", b2);
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         Material mat3 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -222,28 +225,33 @@ public class Main extends SimpleApplication  {
         pointer2.setMaterial(mat2);
         pickUpBox1.setMaterial(mat3);
         
-        
-        brick_phy = new RigidBodyControl(10f);
-       
-        toolLeft = new RigidBodyControl(0f);
-        toolRight = new RigidBodyControl(0f);
-        
+        BoxCollisionShape boxShape = new  BoxCollisionShape( new Vector3f(0.5f, 0.5f, 0.5f));
+        brick_phy = new RigidBodyControl(boxShape, 10f);
+        brick_phy.setKinematic(false);
+        toolLeft = new RigidBodyControl(0.1f);
+        toolRight = new RigidBodyControl(0.1f);
         pickUpBox1.addControl(brick_phy);
+        pickUpBox1.setLocalTranslation(new Vector3f(0f, 1f, 0f));
         pointer1.addControl(toolLeft);
         pointer2.addControl(toolRight);
+        
+        
         bulletAppState.getPhysicsSpace().add(brick_phy);
         bulletAppState.getPhysicsSpace().add(toolLeft);
         bulletAppState.getPhysicsSpace().add(toolRight);
         bulletAppState.getPhysicsSpace().enableDebug(assetManager);
-        pickUpBox1.setLocalTranslation(0, 0, -1);
+        //brick_phy.setPhysicsLocation(new Vector3f(0f, 6f, 0f));
+        toolLeft.setPhysicsLocation(new Vector3f(3f, 1f, 0f));
+        toolRight.setPhysicsLocation(new Vector3f(4f, 1f, 0f));
         tools.attachChild(pointer1);
         tools.attachChild(pointer2);
         pickables.attachChild(pickUpBox1);
+        
         test = (BoundingBox) pickUpBox1.getModelBound();
         listener = new LeapListener(this.settings.getWidth(), this.settings.getHeight());
         SettingsIO settingFile = new SettingsIO("assets/Settings/ProgramSettings.xml");
         /* A colored lit cube. Needs light source! */
-         brick_phy.setKinematic(false);
+       
         //Leap motion section
         controller.addListener(listener);
         
@@ -260,6 +268,7 @@ public class Main extends SimpleApplication  {
         rootNode.attachChild(SkyFactory.createSky(
             assetManager, "Textures/Sky/Bright/BrightSky.dds", false));
         initCrossHairs();
+        
 
     }
 
@@ -283,12 +292,6 @@ public class Main extends SimpleApplication  {
         guiViewPort.addProcessor(niftyDisplay);
         // disable the fly cam
         flyCam.setDragToRotate(true);
-        // Add it to out initial window
-
-
-        // Add window to the screen
-
-
     }
 
     @Override
@@ -317,7 +320,7 @@ private AnalogListener analogListener = new AnalogListener() {
            float dist = results.getCollision(i).getDistance();
            Vector3f pt = results.getCollision(i).getContactPoint();
            String target = results.getCollision(i).getGeometry().getName();
-           System.out.println("Selection #" + i + ": " + target + " at " + pt + ", " + dist + " WU away.");
+//           System.out.println("Selection #" + i + ": " + target + " at " + pt + ", " + dist + " WU away.");
          }
          //System.out.println(results.size());
          if (results.size() > 0) {
@@ -326,12 +329,12 @@ private AnalogListener analogListener = new AnalogListener() {
            // Here comes the action:
            Vector3f pt = results.getCollision(0).getContactPoint();
            pt.z = 0;
-           if(pt.y<0)//dont fall down
+           if(pt.y<0.1f)//dont fall down
            {
-               pt.y =0;
+               pt.y =0.1f;
            }
            target.getControl(RigidBodyControl.class).setPhysicsLocation(pt);
-           //target.getControl(RigidBodyControl.class).setPhysicsRotation(Matrix3f.ZERO);
+           target.getControl(RigidBodyControl.class).clearForces();
            if(!target.getControl(RigidBodyControl.class).isActive())
            {
                target.getControl(RigidBodyControl.class).activate();
@@ -355,6 +358,7 @@ private AnalogListener analogListener = new AnalogListener() {
   };
   protected void initCrossHairs() {
     guiNode.detachAllChildren();
+    
     guiFont = assetManager.loadFont("Interface/Fonts/Default.fnt");
     BitmapText ch = new BitmapText(guiFont, false);
     ch.setSize(guiFont.getCharSet().getRenderedSize() * 2);
@@ -366,65 +370,114 @@ private AnalogListener analogListener = new AnalogListener() {
   }
     @Override
     public void simpleUpdate(float tpf) {
-        
-        /*
+       
+        if(brick_phy.getLinearVelocity().getY()<-10f)
+        {
+        brick_phy.setLinearVelocity(Vector3f.ZERO);
+        }
+        if(!brick_phy.isActive() )
+        {
+              brick_phy.activate();    
+        }
+        if(brick_phy.getPhysicsLocation().y<-5.0f)
+        {  
+            brick_phy.setPhysicsLocation(Vector3f.ZERO);
+        }
         //Camera rotation by left hand RPY
+//        test = (BoundingBox) pickUpBox1.getModelBound();
         Quaternion qatRotationCamera =  new Quaternion().fromAngles(getCameraRotationRPY().x, 0, getCameraRotationRPY().z);
         Quaternion qatRotationCameraLocal =  new Quaternion().fromAngles(0, getCameraRotationRPY().y, 0);
         cam.setRotation(qatRotationCamera);
-        System.out.println(cam.getRotation());
         cam.setLocation(getCameraPositionXYZ());
+        //brick_phy.setPhysicsRotation(qatRotationCameraLocal);
         tableNode.setLocalRotation(qatRotationCameraLocal);
-        
+        //floor_phy.setPhysicsLocation(new Vector3f(0, getCameraRotationRPY().y, 0));
+        //pshycis rotation for all elements on the table
+        for(Spatial spat : tableNode.getChildren())
+        {
+            spat.getControl(RigidBodyControl.class).setPhysicsRotation(qatRotationCameraLocal);
+        }
+        //pickUpBox1.setLocalRotation(qatRotationCameraLocal);
+        for(Spatial spat : pickables.getChildren())
+        {
+//            spat.getControl(RigidBodyControl.class).setEnabled(false);
+//            spat.getControl(RigidBodyControl.class).setPhysicsRotation(qatRotationCameraLocal);
+//            spat.getControl(RigidBodyControl.class).setEnabled(true);
+              //spat.getControl(RigidBodyControl.class).setPhysicsRotation(qatRotationCameraLocal);
+          
+//          
+//            spat.getControl(RigidBodyControl.class).setPhysicsLocation(new Vector3f(2, 1, 0));
+        }
+        //floor_phy.setPhysicsRotation(qatRotationCameraLocal);
         // make the player rotate:
         Vector3f temp = getThumbRotateVector().mult(new Vector3f(0, 0, 1));
        // Quaternion qat =  new Quaternion(getThumbRotateVector().toArray(null));
         Quaternion quat1 = new Quaternion().fromAngles(getThumbRotateVector().x, getThumbRotateVector().y,0 );
         Quaternion quat2 = new Quaternion().fromAngles(getForeFingerRotateVector().x, getForeFingerRotateVector().y,0 );
-        //Quaternion qat =  new Quaternion().fromAngleAxis(90*FastMath.DEG_TO_RAD, getThumbRotateVector());
-        //Quaternion qat =  new Quaternion().fromAngleAxis(getThumbRotateVector().x, new Vector3f(1,-1,0));
-        //System.out.println(qat);
-        //Quaternion qat =  new Quaternion().fromAngleAxis(getThumbRotateVector().x, new Vector3f(1,0,0));
-        //Quaternion qat =  new Quaternion().fromAngles(getThumbRotateVector().x, getThumbRotateVector().y, 0);
-        //Quaternion qat2 =  new Quaternion().fromAngleAxis(getThumbRotateVector().y, new Vector3f(0,1,0));
-        //Quaternion qat = new  Quaternion().fromAngles(getThumbRotateVector().x, getThumbRotateVector().y, getThumbRotateVector().z);
-        //qat = qat.mult(qat2);
-        //pointer1.setLocalRotation(qat);
-       // pointer1.setLocalRotation(qat2);
+        toolRight.setPhysicsLocation(cam.getRotation().mult(getThumbVector()));//during camera rotation recalculating hand position
+        toolRight.setPhysicsRotation(quat1.mult(cam.getRotation()));
         
-     
+        toolLeft.setPhysicsLocation(cam.getRotation().mult(getForeFingerVector()));//during camera rotation recalculating hand position
+        toolLeft.setPhysicsRotation(quat2.mult(cam.getRotation()));
         
-//        pointer1.setLocalRotation(quat1);
         
-        toolLeft.setPhysicsLocation(cam.getRotation().mult(getThumbVector()));//during camera rotation recalculating hand position
-        toolLeft.setPhysicsRotation(quat1.mult(cam.getRotation()));
-        //pointer1.setLocalRotation(qat2);
-        //pointer1.setLocalRotation(new Quaternion().fromAngleAxis(getThumbRotateVector().y, new Vector3f(0,0,1)));
-//        pointer1.setLocalTranslation(getThumbVector());
-        
-//        pointer2.setLocalRotation(quat2);
-        //pointer2.setLocalRotation( new Quaternion().fromAngleAxis(getForeFingerRotateVector().z, new Vector3f(0,0,1)));
-//        pointer2.setLocalTranslation(getForeFingerVector());
-        
-        toolRight.setPhysicsLocation(cam.getRotation().mult(getForeFingerVector()));
-        toolRight.setPhysicsRotation(quat2.mult(cam.getRotation()));
+//        pointer2.setLocalTranslation(cam.getRotation().mult(getThumbVector()));
+//        pointer2.setLocalRotation(quat1.mult(cam.getRotation()));
+//        pointer1.setLocalTranslation(cam.getRotation().mult(getForeFingerVector()));
+//        pointer1.setLocalRotation(quat2.mult(cam.getRotation()));
         //geom.rotate( 0f , 0.002f , 0f );
         // 1. Reset results list.
-        */
+        
         CollisionResults results = new CollisionResults();
         // 2. Aim the ray from cam loc to cam direction.
        
         // 3. Collect intersections between Ray and Shootables in results list.
-        tools.collideWith(test, results);
-
+        BoundingVolume bv = pickUpBox1.getWorldBound();
+        tools.collideWith(bv, results);
+        System.out.println("BoxPosition : "+brick_phy.getLinearVelocity());
         // 4. Print the results
-       
-        if (results.size() > 0) {
-         //    System.out.println("----- Collisions? " + results.size() + "-----");
-//            pickUpBox1.setLocalTranslation(0, 0, getForeFingerVector().z + 0.3f);
-        }
+        boolean foundLeftTool = false;
+        boolean foundRightTool = false;
+        System.out.println("Result :"+results.size());
+        float averageZPosition = 0;
+         for (int i = 0; i < results.size(); i++) {
+            String   party = results.getCollision(i).getGeometry().getName();
+            averageZPosition+=results.getCollision(i).getGeometry().getLocalTranslation().getZ();
+            
+            System.out.println("Z :"+results.getCollision(i).getGeometry().getLocalTranslation().getZ());
+            if(party.equals("Pointer Left"))
+            {
+                foundLeftTool = true;
+            }
+            else if(party.equals("Pointer Right"))
+            {
+                foundRightTool = true;
+            }
+            
+          }
+         if(foundLeftTool && foundRightTool)
+         {
+             System.out.println("CATCH");
+             //Average of tools position
+             Vector3f betweenTools  = new Vector3f((toolLeft.getPhysicsLocation().x+toolRight.getPhysicsLocation().x)/2, 
+                     (toolLeft.getPhysicsLocation().y+toolRight.getPhysicsLocation().y)/2, averageZPosition/results.size());
+             brick_phy.setPhysicsLocation(betweenTools);
+//             pickUpBox1.setLocalTranslation(pointer1.getLocalTranslation());
+             System.out.println(pointer1.getLocalTranslation());
+             Material matActive = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+             matActive.setColor("Color", ColorRGBA.Red);
+             pickUpBox1.setMaterial(matActive);
+         }
+         else
+         {
+             Material matActive = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+             matActive.setColor("Color", ColorRGBA.Orange);
+             pickUpBox1.setMaterial(matActive);
+         }
         
     }
+ 
+//  
 
    
 }

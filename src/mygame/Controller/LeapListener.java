@@ -20,12 +20,19 @@ import mygame.Main;
  *
  * @author Rafal
  */
+enum SwipeDirection
+    {
+        Up,
+        Down,
+        Left,
+        Right
+    }
 public class LeapListener extends Listener {
 
     int screenWidth;
     int screenHeight;
     Robot robot;
-
+   
     public LeapListener(int screenWidth, int screenHeight) {
         this.screenHeight = screenHeight;
         this.screenWidth = screenWidth;
@@ -42,10 +49,16 @@ public class LeapListener extends Listener {
 
     public void onConnect(Controller controller) {
         System.out.println("Connected");
+        Main.setCameraRotationRPY(new Vector3f( FastMath.PI+0.4f, 0, FastMath.PI));
+        Main.setCameraPositionXYZ(new Vector3f(0, 2f, 12f));
+        controller.config().setFloat("Gesture.Swipe.MinLength", 10);
+        controller.config().setFloat("Gesture.Swipe.MinVelocity", 100);
+        controller.config().save();
         controller.enableGesture(Gesture.Type.TYPE_SWIPE);
-        controller.enableGesture(Gesture.Type.TYPE_CIRCLE);
-        controller.enableGesture(Gesture.Type.TYPE_SCREEN_TAP);
-        controller.enableGesture(Gesture.Type.TYPE_KEY_TAP);
+//        controller.enableGesture(Gesture.Type.TYPE_CIRCLE);
+//        controller.enableGesture(Gesture.Type.TYPE_SCREEN_TAP);
+//        controller.enableGesture(Gesture.Type.TYPE_KEY_TAP);
+       
     }
 
     public void onDisconnect(Controller controller) {
@@ -112,31 +125,83 @@ public class LeapListener extends Listener {
 
             }
             if (frame.hands().count() > 1) {
-
+                
                 Hand handCameraControl = frame.hands().leftmost();
-                System.out.println("YAXIS"+(handCameraControl.palmPosition().getX()/50)%6.28);
-                if (handCameraControl.fingers().count() > 2) {
-                    int podziel = 30;
-                    System.out.println("ROLL:" + (handCameraControl.direction().roll()));
-                    System.out.println("PITCH:" + (handCameraControl.palmPosition().pitch()));
-                    System.out.println("Z:" + (handCameraControl.palmPosition().getZ() / podziel));
-                   // Main.setCameraRotationRPY(new Vector3f(FastMath.HALF_PI - handCameraControl.direction().roll(), (float) ((handCameraControl.palmPosition().getX()/50)%6.28), 0));
+                 if(handCameraControl.fingers().count()>3)
+                 {
+                     int podziel = 30;
+                     Main.setCameraPositionXYZ(new Vector3f(0, handCameraControl.palmPosition().getY() / podziel, 
+                            ( handCameraControl.palmPosition().getZ()+100)/podziel ));
+                     GestureList gestures = frame.gestures();
+                     for (Gesture gst: gestures)
+                     {
+                         SwipeGesture swipe = new SwipeGesture(gst);
+                         if (Math.abs(swipe.direction().getX()) > Math.abs(swipe.direction().getY()))
+                         {
+                            if (swipe.direction().getX() > 0) // right swipe
+                            {
+                                System.out.println("Right swpie");
+                                float xRotation = Main.getCameraRotationRPY().x;
+                                float yRotation = Main.getCameraRotationRPY().y +0.01f;
+                                Main.setCameraRotationRPY(new Vector3f( xRotation, yRotation, FastMath.PI));
+                      //SwipeAction(fingers, SwipeDirection.Right);
+                            }
+                            else // left swipe
+                            {
+                                System.out.println("Left swpie");
+                                float xRotation = Main.getCameraRotationRPY().x;
+                                float yRotation = Main.getCameraRotationRPY().y -0.01f;
+                                Main.setCameraRotationRPY(new Vector3f( xRotation, yRotation, FastMath.PI));
+                  
+                                //SwipeAction(fingers, SwipeDirection.Left);
+                            }
+                         }
+                         else // Vertical swipe
+                        {
+                            if (swipe.direction().getY() > 0) // upward swipe
+                            {
+                                float xRotation = Main.getCameraRotationRPY().x -0.005f;
+                                float yRotation = Main.getCameraRotationRPY().y;
+                                Main.setCameraRotationRPY(new Vector3f( xRotation, yRotation, FastMath.PI));
+                            }
+                            else // downward swipe
+                            {
+                                float xRotation = Main.getCameraRotationRPY().x +0.005f;
+                                float yRotation = Main.getCameraRotationRPY().y;
+                                Main.setCameraRotationRPY(new Vector3f( xRotation, yRotation, FastMath.PI));
+                            }
+                        }
+                     }
+                }
+                
                     
+//                Hand handCameraControl = frame.hands().leftmost();
+////                System.out.println("YAXIS"+(handCameraControl.palmPosition().getX()/50)%6.28);
+//                if (handCameraControl.fingers().count() > 2) {
                     
-//                        Main.setCameraRotationRPY(new Vector3f((float) (-(handCameraControl.palmPosition().getY()/40)%6.28), (float) -((handCameraControl.palmPosition().getX()/40)%6.28), 0));
-                        Main.setCameraRotationRPY(new Vector3f( (float) (FastMath.HALF_PI-(handCameraControl.palmPosition().getY()/40)%6.28), (float) ((handCameraControl.palmPosition().getX()/50)%6.28), FastMath.PI));
-                   
-                    
-                    Vector3f newPositionVectorXYZ = new Vector3f(handCameraControl.palmPosition().getX() / podziel, handCameraControl.palmPosition().getY() / podziel, 
-                            (handCameraControl.palmPosition().getZ() + 100) / podziel);
-                   
-                    Main.setCameraPositionXYZ(new Vector3f(handCameraControl.palmPosition().getX() / podziel, handCameraControl.palmPosition().getY() / podziel, 
-                            (handCameraControl.palmPosition().getZ() + 100) / podziel));
+//                    System.out.println("ROLL:" + (handCameraControl.direction().roll()));
+//                    System.out.println("PITCH:" + (handCameraControl.palmPosition().pitch()));
+//                    System.out.println("Z:" + (handCameraControl.palmPosition().getZ()));
+                      
+//                    
+////                        Main.setCameraRotationRPY(new Vector3f((float) (-(handCameraControl.palmPosition().getY()/40)%6.28), (float) -((handCameraControl.palmPosition().getX()/40)%6.28), 0));
+////                    if(Math.abs((float) Main.getCameraRotationRPY().x - ((handCameraControl.palmPosition().getX()/50)%6.28)) > 0.2f)
+////                    {
+//                        Main.setCameraRotationRPY(new Vector3f( (float) (FastMath.HALF_PI-(handCameraControl.palmPosition().getY()/40)%6.28), (float) ((float)  ((handCameraControl.palmPosition().getX()/50)%6.28)), FastMath.PI));
+////                    }
+//
+//                   if(Math.abs(Main.getCameraPositionXYZ().z - handCameraControl.palmPosition().getZ())>10)
+//                   {
+//                       Main.setCameraPositionXYZ(new Vector3f(handCameraControl.palmPosition().getX() / podziel, handCameraControl.palmPosition().getY() / podziel, 
+//                            ( handCameraControl.palmPosition().getZ()) ));
+//                   }
+//                    
+//                   
 //                    Main.setCameraPositionXYZ(new Vector3f(0, 0, 
 //                            (handCameraControl.palmPosition().getZ() + 100) / podziel));
-                    
-                }
-            }
+//                    
+//                }
+//            }
             /*
              // Get the hand's sphere radius and palm position
              System.out.println("Hand sphere radius: " + hand.sphereRadius()
@@ -152,68 +217,6 @@ public class LeapListener extends Listener {
              + "yaw: " + Math.toDegrees(direction.yaw()) + " degrees");
              */
         }
-
-        GestureList gestures = frame.gestures();
-        for (int i = 0; i < gestures.count(); i++) {
-            Gesture gesture = gestures.get(i);
-
-            switch (gesture.type()) {
-                case TYPE_CIRCLE:
-                    CircleGesture circle = new CircleGesture(gesture);
-
-                    // Calculate clock direction using the angle between circle normal and pointable
-                    String clockwiseness;
-                    if (circle.pointable().direction().angleTo(circle.normal()) <= Math.PI / 4) {
-                        // Clockwise if angle is less than 90 degrees
-                        clockwiseness = "clockwise";
-                    } else {
-                        clockwiseness = "counterclockwise";
-                    }
-
-                    // Calculate angle swept since last frame
-                    double sweptAngle = 0;
-                    if (circle.state() != State.STATE_START) {
-                        CircleGesture previousUpdate = new CircleGesture(controller.frame(1).gesture(circle.id()));
-                        sweptAngle = (circle.progress() - previousUpdate.progress()) * 2 * Math.PI;
-                    }
-
-                    System.out.println("Circle id: " + circle.id()
-                            + ", " + circle.state()
-                            + ", progress: " + circle.progress()
-                            + ", radius: " + circle.radius()
-                            + ", angle: " + Math.toDegrees(sweptAngle)
-                            + ", " + clockwiseness);
-                    break;
-                case TYPE_SWIPE:
-                    SwipeGesture swipe = new SwipeGesture(gesture);
-                    System.out.println("Swipe id: " + swipe.id()
-                            + ", " + swipe.state()
-                            + ", position: " + swipe.position()
-                            + ", direction: " + swipe.direction()
-                            + ", speed: " + swipe.speed());
-                    break;
-                case TYPE_SCREEN_TAP:
-                    ScreenTapGesture screenTap = new ScreenTapGesture(gesture);
-                    System.out.println("Screen Tap id: " + screenTap.id()
-                            + ", " + screenTap.state()
-                            + ", position: " + screenTap.position()
-                            + ", direction: " + screenTap.direction());
-                    break;
-                case TYPE_KEY_TAP:
-                    KeyTapGesture keyTap = new KeyTapGesture(gesture);
-                    System.out.println("Key Tap id: " + keyTap.id()
-                            + ", " + keyTap.state()
-                            + ", position: " + keyTap.position()
-                            + ", direction: " + keyTap.direction());
-                    break;
-                default:
-                    System.out.println("Unknown gesture type.");
-                    break;
-            }
-        }
-
-        if (!frame.hands().isEmpty() || !gestures.isEmpty()) {
-            System.out.println();
-        }
     }
+}
 }
