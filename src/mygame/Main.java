@@ -40,7 +40,9 @@ import com.jme3.texture.Texture;
 import com.jme3.util.SkyFactory;
 import com.leapmotion.leap.Controller;
 import de.lessvoid.nifty.Nifty;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
@@ -58,6 +60,14 @@ import tonegod.gui.core.Screen;
  * channels, a controller, and an AnimEventListener.
  */
 public class Main extends SimpleApplication {
+
+    public static boolean isLeftHandActive() {
+        return leftHandActive;
+    }
+
+    public static void setLeftHandActive(boolean aLeftHandActive) {
+        leftHandActive = aLeftHandActive;
+    }
     // Create a sample listener and controller
 
     //physix
@@ -71,7 +81,7 @@ public class Main extends SimpleApplication {
     private RigidBodyControl brick_phy;
     private RigidBodyControl toolLeft;
     private RigidBodyControl toolRight;
-    
+    private Quaternion floorQuatRotate;
     Geometry pointer1;
     float global = 0;
     Geometry pointer2;
@@ -80,17 +90,22 @@ public class Main extends SimpleApplication {
     public int winCount = 0;
     Nifty nifty;
     AudioNode music;
+    
     private Node pickables;
     private Node tools;
     private Node tableNode;
     private RigidBodyControl floor_phy;
     private Box floor;
+    private Quaternion oldRotate;
+//    private List<Vector3f> startPhysicElementPositions = new ArrayList<Vector3f>();
+//    private List<RigidBodyControl> physicObjects = new ArrayList<RigidBodyControl>();
+    private Vector3f startBox1Position;
     static Vector3f thumbVector = new Vector3f();
     static Vector3f thumbRotateVector = new Vector3f();
     static Vector3f foreFingerRotateVector = new Vector3f();
     static Vector3f cameraRotationRPY = new Vector3f(Vector3f.ZERO);
     static Vector3f cameraPositionXYZ = new Vector3f(Vector3f.ZERO);
-
+    private static boolean leftHandActive = false;
     public static Vector3f getCameraPositionXYZ() {
         return cameraPositionXYZ;
     }
@@ -173,6 +188,7 @@ public class Main extends SimpleApplication {
         floor_phy = new RigidBodyControl(0.0f);
         floor_geo.addControl(floor_phy);
         bulletAppState.getPhysicsSpace().add(floor_phy);
+        
     }
 
     public void initMaterials() {
@@ -230,8 +246,9 @@ public class Main extends SimpleApplication {
         brick_phy.setKinematic(false);
         toolLeft = new RigidBodyControl(0.1f);
         toolRight = new RigidBodyControl(0.1f);
-        pickUpBox1.addControl(brick_phy);
         pickUpBox1.setLocalTranslation(new Vector3f(0f, 1f, 0f));
+        pickUpBox1.addControl(brick_phy);
+        
         pointer1.addControl(toolLeft);
         pointer2.addControl(toolRight);
         
@@ -240,6 +257,11 @@ public class Main extends SimpleApplication {
         bulletAppState.getPhysicsSpace().add(toolLeft);
         bulletAppState.getPhysicsSpace().add(toolRight);
         bulletAppState.getPhysicsSpace().enableDebug(assetManager);
+        
+        brick_phy.setFriction(1.0f);
+        brick_phy.setRestitution(0.0f);
+        
+        
         //brick_phy.setPhysicsLocation(new Vector3f(0f, 6f, 0f));
         toolLeft.setPhysicsLocation(new Vector3f(3f, 1f, 0f));
         toolRight.setPhysicsLocation(new Vector3f(4f, 1f, 0f));
@@ -268,7 +290,7 @@ public class Main extends SimpleApplication {
         rootNode.attachChild(SkyFactory.createSky(
             assetManager, "Textures/Sky/Bright/BrightSky.dds", false));
         initCrossHairs();
-        
+        startBox1Position = brick_phy.getPhysicsLocation().clone();
 
     }
 
@@ -368,6 +390,14 @@ private AnalogListener analogListener = new AnalogListener() {
       settings.getHeight() / 2 + ch.getLineHeight() / 2, 0);
     guiNode.attachChild(ch);
   }
+  private boolean isQuaterionEquals(Quaternion qt1,Quaternion qt2)
+  {
+      if(Math.abs(qt1.getX() - qt2.getX())>0.001) return false;
+      if(Math.abs(qt1.getY() - qt2.getY())>0.001) return false;
+      if(Math.abs(qt1.getZ() - qt2.getZ())>0.001) return false;
+      if(Math.abs(qt1.getW() - qt2.getW())>0.001) return false;
+      return true;
+  }
     @Override
     public void simpleUpdate(float tpf) {
        
@@ -379,7 +409,7 @@ private AnalogListener analogListener = new AnalogListener() {
         {
               brick_phy.activate();    
         }
-        if(brick_phy.getPhysicsLocation().y<-5.0f)
+        if(brick_phy.getPhysicsLocation().y<-5.0f) // dont fall to much
         {  
             brick_phy.setPhysicsLocation(Vector3f.ZERO);
         }
@@ -389,8 +419,29 @@ private AnalogListener analogListener = new AnalogListener() {
         Quaternion qatRotationCameraLocal =  new Quaternion().fromAngles(0, getCameraRotationRPY().y, 0);
         cam.setRotation(qatRotationCamera);
         cam.setLocation(getCameraPositionXYZ());
-        //brick_phy.setPhysicsRotation(qatRotationCameraLocal);
-        tableNode.setLocalRotation(qatRotationCameraLocal);
+//        brick_phy.setPhysicsRotation(qatRotationCameraLocal);
+        //pickUpBox1.setLocalRotation(qatRotationCameraLocal);//!!!!
+        floorQuatRotate = floor_phy.getPhysicsRotation().clone();
+//        System.out.println("F"+floorQuatRotate);
+//        System.out.println("C"+qatRotationCameraLocal);
+        if(isLeftHandActive())
+        {
+            System.out.println("ROTACJA");
+            Vector3f tempVector = startBox1Position.clone();
+            qatRotationCameraLocal.mult(tempVector, tempVector);
+            brick_phy.setPhysicsRotation(qatRotationCameraLocal);
+            brick_phy.setPhysicsLocation(tempVector);
+        }
+        else
+        {
+             oldRotate = qatRotationCameraLocal;
+             System.out.println(brick_phy.getPhysicsLocation());
+             startBox1Position = brick_phy.getPhysicsLocation().clone();
+        }
+
+        floor_phy.setPhysicsRotation(qatRotationCameraLocal);
+        
+        //pickUpBox1.set(qatRotationCameraLocal);
         //floor_phy.setPhysicsLocation(new Vector3f(0, getCameraRotationRPY().y, 0));
         //pshycis rotation for all elements on the table
         for(Spatial spat : tableNode.getChildren())
@@ -434,17 +485,17 @@ private AnalogListener analogListener = new AnalogListener() {
         // 3. Collect intersections between Ray and Shootables in results list.
         BoundingVolume bv = pickUpBox1.getWorldBound();
         tools.collideWith(bv, results);
-        System.out.println("BoxPosition : "+brick_phy.getLinearVelocity());
+//        System.out.println("BoxPosition : "+brick_phy.getLinearVelocity());
         // 4. Print the results
         boolean foundLeftTool = false;
         boolean foundRightTool = false;
-        System.out.println("Result :"+results.size());
+//        System.out.println("Result :"+results.size());
         float averageZPosition = 0;
          for (int i = 0; i < results.size(); i++) {
             String   party = results.getCollision(i).getGeometry().getName();
             averageZPosition+=results.getCollision(i).getGeometry().getLocalTranslation().getZ();
             
-            System.out.println("Z :"+results.getCollision(i).getGeometry().getLocalTranslation().getZ());
+//            System.out.println("Z :"+results.getCollision(i).getGeometry().getLocalTranslation().getZ());
             if(party.equals("Pointer Left"))
             {
                 foundLeftTool = true;

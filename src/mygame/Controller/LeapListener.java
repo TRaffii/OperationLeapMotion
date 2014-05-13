@@ -73,14 +73,14 @@ public class LeapListener extends Listener {
     public void onFrame(Controller controller) {
         // Get the most recent frame and report some basic information
         Frame frame = controller.frame();
-        /*
+        
          System.out.println("Frame id: " + frame.id()
          + ", timestamp: " + frame.timestamp()
          + ", hands: " + frame.hands().count()
          + ", fingers: " + frame.fingers().count()
          + ", tools: " + frame.tools().count()
          + ", gestures " + frame.gestures().count());
-         * */
+         
         if (!frame.hands().isEmpty()) {
             // Get the first hand
             Hand hand = frame.hands().rightmost();
@@ -112,11 +112,6 @@ public class LeapListener extends Listener {
             {
                 int podziel = 30;
                 int pomnoz = 3;
-//                System.out.println("R:"+(fingers.get(0).direction().roll()));
-//                System.out.println("P:"+(fingers.get(0).direction().pitch()));
-//                System.out.println("Y:"+(fingers.get(0).direction().yaw()));
-                //Main.setThumbRotateVector(new Vector3f(fingers.get(0).direction().roll()-FastMath.HALF_PI,FastMath.PI- fingers.get(0).direction().yaw()+FastMath.PI, ( fingers.get(0).direction().roll()-FastMath.HALF_PI)));
-                //Main.setThumbRotateVector(new Vector3f(0,fingers.get(0).direction().roll(), 0));
                 Main.setThumbRotateVector(new Vector3f(fingers.get(0).direction().pitch(), -fingers.get(0).direction().yaw(), 0));
                 Main.setThumbVector(new Vector3f(-fingers.get(0).tipPosition().getX() / podziel, (fingers.get(0).tipPosition().getY() - 200) / podziel, -fingers.get(0).tipPosition().getZ() / podziel));
 
@@ -125,7 +120,7 @@ public class LeapListener extends Listener {
 
             }
             if (frame.hands().count() > 1) {
-                
+                Main.setLeftHandActive(true);
                 Hand handCameraControl = frame.hands().leftmost();
                  if(handCameraControl.fingers().count()>3)
                  {
@@ -173,6 +168,7 @@ public class LeapListener extends Listener {
                         }
                      }
                 }
+                 
                 
                     
 //                Hand handCameraControl = frame.hands().leftmost();
@@ -217,6 +213,10 @@ public class LeapListener extends Listener {
              + "yaw: " + Math.toDegrees(direction.yaw()) + " degrees");
              */
         }
+            else//left hand inactive
+            {
+                Main.setLeftHandActive(false);
+            }
     }
 }
 }
