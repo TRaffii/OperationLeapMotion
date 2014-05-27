@@ -34,32 +34,34 @@ import org.xml.sax.SAXException;
  * @author Rafal
  */
 public class SettingsIO {
+
     Document document;
+
     public SettingsIO(String filePath) {
         DocumentBuilderFactory builderFactory =
-        DocumentBuilderFactory.newInstance();
+                DocumentBuilderFactory.newInstance();
         builderFactory.setNamespaceAware(true);
         DocumentBuilder builder = null;
         try {
             builder = builderFactory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();  
+            e.printStackTrace();
         }
         try {
-             document = builder.parse(filePath);
+            document = builder.parse(filePath);
         } catch (SAXException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    public String Get(String node)
-    {
-       try {
-            	XPathFactory xpathfactory = XPathFactory.newInstance();
-		XPath xpath = xpathfactory.newXPath();
+
+    public String Get(String node) {
+        try {
+            XPathFactory xpathfactory = XPathFactory.newInstance();
+            XPath xpath = xpathfactory.newXPath();
             //read a string value
-                String expression = "/settings/"+node+"/text()";
+            String expression = "/settings/" + node + "/text()";
             Node myNode = (Node) xpath.compile(expression).evaluate(document, XPathConstants.NODE);
             System.out.println(myNode.getNodeValue());
             return myNode.getNodeValue();
@@ -67,11 +69,12 @@ public class SettingsIO {
             Logger.getLogger(SettingsIO.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
-       
+
     }
-    public boolean Save(String node, String value) throws ParserConfigurationException{
-        
-        String filePath = "assets/Settings/ProgramSettings.xml";  
+
+    public boolean Save(String node, String value) throws ParserConfigurationException {
+
+        String filePath = "assets/Settings/ProgramSettings.xml";
         File file = new File(filePath);
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -106,9 +109,8 @@ public class SettingsIO {
         } catch (TransformerException ex) {
             Logger.getLogger(SettingsIO.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-       
+
+
         return true;
     }
-    
 }

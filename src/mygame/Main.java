@@ -69,7 +69,6 @@ public class Main extends SimpleApplication {
         leftHandActive = aLeftHandActive;
     }
     // Create a sample listener and controller
-
     //physix
     private BulletAppState bulletAppState;
     //Material
@@ -82,6 +81,7 @@ public class Main extends SimpleApplication {
     private RigidBodyControl toolLeft;
     private RigidBodyControl toolRight;
     private Quaternion floorQuatRotate;
+    private boolean isRotationStart = false;
     Geometry pointer1;
     float global = 0;
     Geometry pointer2;
@@ -90,13 +90,12 @@ public class Main extends SimpleApplication {
     public int winCount = 0;
     Nifty nifty;
     AudioNode music;
-    
     private Node pickables;
     private Node tools;
     private Node tableNode;
     private RigidBodyControl floor_phy;
     private Box floor;
-    private Quaternion oldRotate;
+    private Quaternion oldRotate = Quaternion.ZERO;
 //    private List<Vector3f> startPhysicElementPositions = new ArrayList<Vector3f>();
 //    private List<RigidBodyControl> physicObjects = new ArrayList<RigidBodyControl>();
     private Vector3f startBox1Position;
@@ -106,6 +105,7 @@ public class Main extends SimpleApplication {
     static Vector3f cameraRotationRPY = new Vector3f(Vector3f.ZERO);
     static Vector3f cameraPositionXYZ = new Vector3f(Vector3f.ZERO);
     private static boolean leftHandActive = false;
+
     public static Vector3f getCameraPositionXYZ() {
         return cameraPositionXYZ;
     }
@@ -130,6 +130,7 @@ public class Main extends SimpleApplication {
     public static void setScreenFlag(int screenFlag) {
         Main.screenFlag = screenFlag;
     }
+
     public static Vector3f getThumbRotateVector() {
         return thumbRotateVector;
     }
@@ -165,8 +166,8 @@ public class Main extends SimpleApplication {
     Controller controller = new Controller();
     private Screen screen;
     static Main app;
-    public static Main getApp()
-    {
+
+    public static Main getApp() {
         return app;
     }
 
@@ -188,7 +189,7 @@ public class Main extends SimpleApplication {
         floor_phy = new RigidBodyControl(0.0f);
         floor_geo.addControl(floor_phy);
         bulletAppState.getPhysicsSpace().add(floor_phy);
-        
+
     }
 
     public void initMaterials() {
@@ -211,8 +212,8 @@ public class Main extends SimpleApplication {
         rootNode.attachChild(tableNode);
         setCameraPositionXYZ(new Vector3f(0, 3f, 12f));
         flyCam.setMoveSpeed(10);
-        inputManager.addMapping("pick up",   new  MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-        inputManager.addMapping("reset",   new  KeyTrigger(KeyInput.KEY_SPACE));
+        inputManager.addMapping("pick up", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addMapping("reset", new KeyTrigger(KeyInput.KEY_SPACE));
         inputManager.addListener(analogListener, "pick up");
         inputManager.addListener(analogListener, "reset");
         floor = new Box(10f, 0.1f, 5f);
@@ -230,65 +231,66 @@ public class Main extends SimpleApplication {
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         Material mat3 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        
-        
+
+
         mat.setColor("Color", ColorRGBA.Pink);
         mat2.setColor("Color", ColorRGBA.Blue);
         mat3.setColor("Color", ColorRGBA.Orange);
-        
-        
+
+
         pointer1.setMaterial(mat);
         pointer2.setMaterial(mat2);
         pickUpBox1.setMaterial(mat3);
-        
-        BoxCollisionShape boxShape = new  BoxCollisionShape( new Vector3f(0.5f, 0.5f, 0.5f));
+
+        BoxCollisionShape boxShape = new BoxCollisionShape(new Vector3f(0.5f, 0.5f, 0.5f));
         brick_phy = new RigidBodyControl(boxShape, 10f);
         brick_phy.setKinematic(false);
         toolLeft = new RigidBodyControl(0.1f);
         toolRight = new RigidBodyControl(0.1f);
         pickUpBox1.setLocalTranslation(new Vector3f(0f, 1f, 0f));
         pickUpBox1.addControl(brick_phy);
-        
+
         pointer1.addControl(toolLeft);
         pointer2.addControl(toolRight);
-        
-        
+
+
         bulletAppState.getPhysicsSpace().add(brick_phy);
         bulletAppState.getPhysicsSpace().add(toolLeft);
         bulletAppState.getPhysicsSpace().add(toolRight);
         bulletAppState.getPhysicsSpace().enableDebug(assetManager);
-        
+
         brick_phy.setFriction(1.0f);
         brick_phy.setRestitution(0.0f);
-        
-        
+
+
         //brick_phy.setPhysicsLocation(new Vector3f(0f, 6f, 0f));
         toolLeft.setPhysicsLocation(new Vector3f(3f, 1f, 0f));
         toolRight.setPhysicsLocation(new Vector3f(4f, 1f, 0f));
         tools.attachChild(pointer1);
         tools.attachChild(pointer2);
         pickables.attachChild(pickUpBox1);
-        
+
         test = (BoundingBox) pickUpBox1.getModelBound();
         listener = new LeapListener(this.settings.getWidth(), this.settings.getHeight());
         SettingsIO settingFile = new SettingsIO("assets/Settings/ProgramSettings.xml");
         /* A colored lit cube. Needs light source! */
-       
+
         //Leap motion section
         controller.addListener(listener);
-        
+
 
         //      DirectionalLight sun = new DirectionalLight();
         //      sun.setDirection((new Vector3f(-0.1f,-0.7f,-1.0f)));
         //      rootNode.addLight(sun);
-        initGUIScreen();
         music = new AudioNode(assetManager, "Sounds/HappyBee.wav", true);
         if (settingFile.Get("music").equals("on")) {
             music.play();
         }
+        initGUIScreen();
+
 
         rootNode.attachChild(SkyFactory.createSky(
-            assetManager, "Textures/Sky/Bright/BrightSky.dds", false));
+                assetManager, "Textures/Sky/Bright/BrightSky.dds", false));
         initCrossHairs();
         startBox1Position = brick_phy.getPhysicsLocation().clone();
 
@@ -302,7 +304,7 @@ public class Main extends SimpleApplication {
          */
         nifty = niftyDisplay.getNifty();
         System.out.println(nifty.getVersion());
-        StartScreenController startScreenState = new StartScreenController();
+        StartScreenController startScreenState = new StartScreenController(music);
         startScreenState.initialize(stateManager, this);
         stateManager.attach(startScreenState);
         /**
@@ -322,101 +324,107 @@ public class Main extends SimpleApplication {
         super.stop();
 
     }
-private AnalogListener analogListener = new AnalogListener() {
-    public void onAnalog(String name, float value, float tpf) {
- 
-      if (name.equals("pick up")) {         // test?
- //        brick_phy.setPhysicsLocation(new Vector3f(0, 4f, 0));
-        
+    private AnalogListener analogListener = new AnalogListener() {
+        public void onAnalog(String name, float value, float tpf) {
+
+            if (name.equals("pick up")) {         // test?
+                //        brick_phy.setPhysicsLocation(new Vector3f(0, 4f, 0));
+
 //        if(!brick_phy.isActive())
 //            brick_phy.activate();
-         CollisionResults results = new CollisionResults();
-         // Aim the ray from camera location in camera direction
-         // (assuming crosshairs in center of screen).
-         Ray ray = new Ray(cam.getLocation(), cam.getDirection());
-         //System.out.println("Ray dir = "+ray.getDirection());
-         // Collect intersections between ray and all nodes in results list.
-         pickables.collideWith(ray, results);
-         for (int i = 0; i < results.size(); i++) {
-           // For each “hit”, we know distance, impact point, geometry.
-           float dist = results.getCollision(i).getDistance();
-           Vector3f pt = results.getCollision(i).getContactPoint();
-           String target = results.getCollision(i).getGeometry().getName();
+                CollisionResults results = new CollisionResults();
+                // Aim the ray from camera location in camera direction
+                // (assuming crosshairs in center of screen).
+                Ray ray = new Ray(cam.getLocation(), cam.getDirection());
+                //System.out.println("Ray dir = "+ray.getDirection());
+                // Collect intersections between ray and all nodes in results list.
+                pickables.collideWith(ray, results);
+                for (int i = 0; i < results.size(); i++) {
+                    // For each “hit”, we know distance, impact point, geometry.
+                    float dist = results.getCollision(i).getDistance();
+                    Vector3f pt = results.getCollision(i).getContactPoint();
+                    String target = results.getCollision(i).getGeometry().getName();
 //           System.out.println("Selection #" + i + ": " + target + " at " + pt + ", " + dist + " WU away.");
-         }
-         //System.out.println(results.size());
-         if (results.size() > 0) {
-           // The closest result is the target that the player picked:
-           Geometry target = results.getClosestCollision().getGeometry();
-           // Here comes the action:
-           Vector3f pt = results.getCollision(0).getContactPoint();
-           pt.z = 0;
-           if(pt.y<0.1f)//dont fall down
-           {
-               pt.y =0.1f;
-           }
-           target.getControl(RigidBodyControl.class).setPhysicsLocation(pt);
-           target.getControl(RigidBodyControl.class).clearForces();
-           if(!target.getControl(RigidBodyControl.class).isActive())
-           {
-               target.getControl(RigidBodyControl.class).activate();
-           }
-         }
-      } 
-     if (name.equals("reset")) { 
-          brick_phy.clearForces();
-          brick_phy.setPhysicsRotation(Matrix3f.ZERO);
-          brick_phy.setPhysicsLocation(new Vector3f(1f, 0.5f, 0));
-          if(!brick_phy.isActive() )
-          {
-                
-                brick_phy.activate();
-               
-          }
-     }
-    
- 
+                }
+                //System.out.println(results.size());
+                if (results.size() > 0) {
+                    // The closest result is the target that the player picked:
+                    Geometry target = results.getClosestCollision().getGeometry();
+                    // Here comes the action:
+                    Vector3f pt = results.getCollision(0).getContactPoint();
+                    pt.z = 0;
+                    if (pt.y < 0.1f)//dont fall down
+                    {
+                        pt.y = 0.1f;
+                    }
+                    target.getControl(RigidBodyControl.class).setPhysicsLocation(pt);
+                    target.getControl(RigidBodyControl.class).clearForces();
+                    if (!target.getControl(RigidBodyControl.class).isActive()) {
+                        target.getControl(RigidBodyControl.class).activate();
+                    }
+                }
+            }
+            if (name.equals("reset")) {
+                brick_phy.clearForces();
+                brick_phy.setPhysicsRotation(Matrix3f.ZERO);
+                brick_phy.setPhysicsLocation(new Vector3f(1f, 0.5f, 0));
+                if (!brick_phy.isActive()) {
+
+                    brick_phy.activate();
+
+                }
+            }
+
+
+        }
+    };
+
+    protected void initCrossHairs() {
+        guiNode.detachAllChildren();
+
+        guiFont = assetManager.loadFont("Interface/Fonts/Default.fnt");
+        BitmapText ch = new BitmapText(guiFont, false);
+        ch.setSize(guiFont.getCharSet().getRenderedSize() * 2);
+        ch.setText("+");        // fake crosshairs :)
+        ch.setLocalTranslation( // center
+                settings.getWidth() / 2 - guiFont.getCharSet().getRenderedSize() / 3 * 2,
+                settings.getHeight() / 2 + ch.getLineHeight() / 2, 0);
+        guiNode.attachChild(ch);
     }
-  };
-  protected void initCrossHairs() {
-    guiNode.detachAllChildren();
-    
-    guiFont = assetManager.loadFont("Interface/Fonts/Default.fnt");
-    BitmapText ch = new BitmapText(guiFont, false);
-    ch.setSize(guiFont.getCharSet().getRenderedSize() * 2);
-    ch.setText("+");        // fake crosshairs :)
-    ch.setLocalTranslation( // center
-      settings.getWidth() / 2 - guiFont.getCharSet().getRenderedSize() / 3 * 2,
-      settings.getHeight() / 2 + ch.getLineHeight() / 2, 0);
-    guiNode.attachChild(ch);
-  }
-  private boolean isQuaterionEquals(Quaternion qt1,Quaternion qt2)
-  {
-      if(Math.abs(qt1.getX() - qt2.getX())>0.001) return false;
-      if(Math.abs(qt1.getY() - qt2.getY())>0.001) return false;
-      if(Math.abs(qt1.getZ() - qt2.getZ())>0.001) return false;
-      if(Math.abs(qt1.getW() - qt2.getW())>0.001) return false;
-      return true;
-  }
+
+    private boolean isQuaterionEquals(Quaternion qt1, Quaternion qt2) {
+        if (Math.abs(qt1.getX() - qt2.getX()) > 0.001) {
+            return false;
+        }
+        if (Math.abs(qt1.getY() - qt2.getY()) > 0.001) {
+            return false;
+        }
+        if (Math.abs(qt1.getZ() - qt2.getZ()) > 0.001) {
+            return false;
+        }
+        if (Math.abs(qt1.getW() - qt2.getW()) > 0.001) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public void simpleUpdate(float tpf) {
-       
-        if(brick_phy.getLinearVelocity().getY()<-10f)
-        {
-        brick_phy.setLinearVelocity(Vector3f.ZERO);
+
+        if (brick_phy.getLinearVelocity().getY() < -10f) {
+            brick_phy.setLinearVelocity(Vector3f.ZERO);
         }
-        if(!brick_phy.isActive() )
-        {
-              brick_phy.activate();    
+        if (!brick_phy.isActive()) {
+            brick_phy.activate();
         }
-        if(brick_phy.getPhysicsLocation().y<-5.0f) // dont fall to much
-        {  
+        if (brick_phy.getPhysicsLocation().y < -5.0f) // dont fall to much
+        {
             brick_phy.setPhysicsLocation(Vector3f.ZERO);
         }
         //Camera rotation by left hand RPY
 //        test = (BoundingBox) pickUpBox1.getModelBound();
-        Quaternion qatRotationCamera =  new Quaternion().fromAngles(getCameraRotationRPY().x, 0, getCameraRotationRPY().z);
-        Quaternion qatRotationCameraLocal =  new Quaternion().fromAngles(0, getCameraRotationRPY().y, 0);
+        Quaternion qatRotationCamera = new Quaternion().fromAngles(getCameraRotationRPY().x, 0, getCameraRotationRPY().z);
+        Quaternion qatRotationCameraLocal = new Quaternion().fromAngles(0, getCameraRotationRPY().y, 0);
         cam.setRotation(qatRotationCamera);
         cam.setLocation(getCameraPositionXYZ());
 //        brick_phy.setPhysicsRotation(qatRotationCameraLocal);
@@ -424,64 +432,69 @@ private AnalogListener analogListener = new AnalogListener() {
         floorQuatRotate = floor_phy.getPhysicsRotation().clone();
 //        System.out.println("F"+floorQuatRotate);
 //        System.out.println("C"+qatRotationCameraLocal);
-        if(isLeftHandActive())
-        {
-            System.out.println("ROTACJA");
-            Vector3f tempVector = startBox1Position.clone();
-            qatRotationCameraLocal.mult(tempVector, tempVector);
-            brick_phy.setPhysicsRotation(qatRotationCameraLocal);
-            brick_phy.setPhysicsLocation(tempVector);
-        }
-        else
-        {
+        if (isLeftHandActive()) {
+//            System.out.println("ROTACJA");
+//            if(!isRotationStart)
+//                {
+//                    oldRotate = qatRotationCameraLocal;
+//                    isRotationStart = true;
+//                }
+               Vector3f tempVector = startBox1Position.clone();
+               System.out.println("QUAT:"+qatRotationCameraLocal.subtract(oldRotate).toString());
+                //qatRotationCameraLocal.subtract(oldRotate).mult(tempVector, tempVector);
+                qatRotationCameraLocal.mult(tempVector, tempVector);
+                System.out.println("VECTOR:"+tempVector.toString());
+                brick_phy.setPhysicsRotation(qatRotationCameraLocal);
+                //TODO : zrobic tak aby po podniesieniu reki klocek pozostawal
+                brick_phy.setPhysicsLocation(tempVector);
+                
+           
+        } else {
              oldRotate = qatRotationCameraLocal;
-             System.out.println(brick_phy.getPhysicsLocation());
-             startBox1Position = brick_phy.getPhysicsLocation().clone();
+                isRotationStart = false;
+//             System.out.println(brick_phy.getPhysicsLocation());
+            startBox1Position = brick_phy.getPhysicsLocation().clone();
         }
-
         floor_phy.setPhysicsRotation(qatRotationCameraLocal);
-        
+
         //pickUpBox1.set(qatRotationCameraLocal);
         //floor_phy.setPhysicsLocation(new Vector3f(0, getCameraRotationRPY().y, 0));
         //pshycis rotation for all elements on the table
-        for(Spatial spat : tableNode.getChildren())
-        {
+        for (Spatial spat : tableNode.getChildren()) {
             spat.getControl(RigidBodyControl.class).setPhysicsRotation(qatRotationCameraLocal);
         }
         //pickUpBox1.setLocalRotation(qatRotationCameraLocal);
-        for(Spatial spat : pickables.getChildren())
-        {
+        for (Spatial spat : pickables.getChildren()) {
 //            spat.getControl(RigidBodyControl.class).setEnabled(false);
 //            spat.getControl(RigidBodyControl.class).setPhysicsRotation(qatRotationCameraLocal);
 //            spat.getControl(RigidBodyControl.class).setEnabled(true);
-              //spat.getControl(RigidBodyControl.class).setPhysicsRotation(qatRotationCameraLocal);
-          
+            //spat.getControl(RigidBodyControl.class).setPhysicsRotation(qatRotationCameraLocal);
 //          
 //            spat.getControl(RigidBodyControl.class).setPhysicsLocation(new Vector3f(2, 1, 0));
         }
         //floor_phy.setPhysicsRotation(qatRotationCameraLocal);
         // make the player rotate:
         Vector3f temp = getThumbRotateVector().mult(new Vector3f(0, 0, 1));
-       // Quaternion qat =  new Quaternion(getThumbRotateVector().toArray(null));
-        Quaternion quat1 = new Quaternion().fromAngles(getThumbRotateVector().x, getThumbRotateVector().y,0 );
-        Quaternion quat2 = new Quaternion().fromAngles(getForeFingerRotateVector().x, getForeFingerRotateVector().y,0 );
+        // Quaternion qat =  new Quaternion(getThumbRotateVector().toArray(null));
+        Quaternion quat1 = new Quaternion().fromAngles(getThumbRotateVector().x, getThumbRotateVector().y, 0);
+        Quaternion quat2 = new Quaternion().fromAngles(getForeFingerRotateVector().x, getForeFingerRotateVector().y, 0);
         toolRight.setPhysicsLocation(cam.getRotation().mult(getThumbVector()));//during camera rotation recalculating hand position
         toolRight.setPhysicsRotation(quat1.mult(cam.getRotation()));
-        
+
         toolLeft.setPhysicsLocation(cam.getRotation().mult(getForeFingerVector()));//during camera rotation recalculating hand position
         toolLeft.setPhysicsRotation(quat2.mult(cam.getRotation()));
-        
-        
+
+
 //        pointer2.setLocalTranslation(cam.getRotation().mult(getThumbVector()));
 //        pointer2.setLocalRotation(quat1.mult(cam.getRotation()));
 //        pointer1.setLocalTranslation(cam.getRotation().mult(getForeFingerVector()));
 //        pointer1.setLocalRotation(quat2.mult(cam.getRotation()));
         //geom.rotate( 0f , 0.002f , 0f );
         // 1. Reset results list.
-        
+
         CollisionResults results = new CollisionResults();
         // 2. Aim the ray from cam loc to cam direction.
-       
+
         // 3. Collect intersections between Ray and Shootables in results list.
         BoundingVolume bv = pickUpBox1.getWorldBound();
         tools.collideWith(bv, results);
@@ -491,44 +504,35 @@ private AnalogListener analogListener = new AnalogListener() {
         boolean foundRightTool = false;
 //        System.out.println("Result :"+results.size());
         float averageZPosition = 0;
-         for (int i = 0; i < results.size(); i++) {
-            String   party = results.getCollision(i).getGeometry().getName();
-            averageZPosition+=results.getCollision(i).getGeometry().getLocalTranslation().getZ();
-            
+        for (int i = 0; i < results.size(); i++) {
+            String party = results.getCollision(i).getGeometry().getName();
+            averageZPosition += results.getCollision(i).getGeometry().getLocalTranslation().getZ();
+
 //            System.out.println("Z :"+results.getCollision(i).getGeometry().getLocalTranslation().getZ());
-            if(party.equals("Pointer Left"))
-            {
+            if (party.equals("Pointer Left")) {
                 foundLeftTool = true;
-            }
-            else if(party.equals("Pointer Right"))
-            {
+            } else if (party.equals("Pointer Right")) {
                 foundRightTool = true;
             }
-            
-          }
-         if(foundLeftTool && foundRightTool)
-         {
-             System.out.println("CATCH");
-             //Average of tools position
-             Vector3f betweenTools  = new Vector3f((toolLeft.getPhysicsLocation().x+toolRight.getPhysicsLocation().x)/2, 
-                     (toolLeft.getPhysicsLocation().y+toolRight.getPhysicsLocation().y)/2, averageZPosition/results.size());
-             brick_phy.setPhysicsLocation(betweenTools);
-//             pickUpBox1.setLocalTranslation(pointer1.getLocalTranslation());
-             System.out.println(pointer1.getLocalTranslation());
-             Material matActive = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-             matActive.setColor("Color", ColorRGBA.Red);
-             pickUpBox1.setMaterial(matActive);
-         }
-         else
-         {
-             Material matActive = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-             matActive.setColor("Color", ColorRGBA.Orange);
-             pickUpBox1.setMaterial(matActive);
-         }
-        
-    }
- 
-//  
 
-   
+        }
+        if (foundLeftTool && foundRightTool) {
+//             System.out.println("CATCH");
+            //Average of tools position
+            Vector3f betweenTools = new Vector3f((toolLeft.getPhysicsLocation().x + toolRight.getPhysicsLocation().x) / 2,
+                    (toolLeft.getPhysicsLocation().y + toolRight.getPhysicsLocation().y) / 2, averageZPosition / results.size());
+            brick_phy.setPhysicsLocation(betweenTools);
+//             pickUpBox1.setLocalTranslation(pointer1.getLocalTranslation());
+//             System.out.println(pointer1.getLocalTranslation());
+            Material matActive = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+            matActive.setColor("Color", ColorRGBA.Red);
+            pickUpBox1.setMaterial(matActive);
+        } else {
+            Material matActive = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+            matActive.setColor("Color", ColorRGBA.Orange);
+            pickUpBox1.setMaterial(matActive);
+        }
+
+    }
+//  
 }
