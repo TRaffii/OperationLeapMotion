@@ -4,14 +4,16 @@
  */
 package mygame.Controller;
 
-import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
+import com.jme3.asset.plugins.HttpZipLocator;
 import com.jme3.audio.AudioNode;
+import com.jme3.material.Material;
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.builder.TextBuilder;
+import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
-import java.sql.Date;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.logging.Level;
@@ -80,7 +82,7 @@ public class OptionsScreenController extends AbstractAppState implements ScreenC
                 } catch (ParserConfigurationException ex) {
                     Logger.getLogger(OptionsScreenController.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                
+
                 Main.setMusic(new AudioNode(app.getAssetManager(), "Sounds/HappyBee.wav", true));
                 Main.getMusic().play();
                 musicPlay = true;
@@ -95,21 +97,37 @@ public class OptionsScreenController extends AbstractAppState implements ScreenC
             nifty.fromXml("Interface/screen.xml", "start");
         }
     }
-    public void OrangeBox()
-    {
+
+    public void OrangeBox() {
         if (activateButton()) {
-        
+            app.getAssetManager().registerLocator("http://better-web.pl/test/HeartAfter.zip",
+                    HttpZipLocator.class);
+            Main.setMaterialPickUpActive(new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md"));
+            Main.getMaterialPickUpActive().setTexture("LightMap", app.getAssetManager().loadTexture(
+                    "HumanHeart-color.jpg"));
+            Main.getPickUpBox1().setMaterial(Main.getMaterialPickUpActive());
         }
-        
+
     }
-    
-    public void BlueBox()
-    {
+
+    public void BlueBox() {
+//       Element popupElement = nifty.createPopup("popupExit");
+//       nifty.showPopup(nifty.getCurrentScreen(), popupElement.getId(), null);
         if (activateButton()) {
-            
+            try {
+                app.getAssetManager().registerLocator("http://better-web.pl/test/HeartAfter.zip",
+                        HttpZipLocator.class);
+                Main.setMaterialPickUpActive(new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md"));
+                Main.getMaterialPickUpActive().setTexture("LightMap", app.getAssetManager().loadTexture(
+                        "HumanHeart-bump.jpg"));
+                Main.getPickUpBox1().setMaterial(Main.getMaterialPickUpActive());
+            } catch (Exception ex) {
+                
+            }
         }
-        
+
     }
+
     public void MusicOff() {
         if (activateButton()) {
             SettingsIO settingFile = new SettingsIO("assets/Settings/ProgramSettings.xml");

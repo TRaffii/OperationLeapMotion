@@ -8,18 +8,16 @@ import com.jme3.audio.AudioNode;
 import com.jme3.collision.CollisionResults;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.bounding.BoundingVolume;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.collision.PhysicsCollisionEvent;
-import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
+import com.jme3.bullet.collision.shapes.CollisionShape;
+import com.jme3.bullet.collision.shapes.MeshCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.font.BitmapText;
-import com.jme3.input.FlyByCamera;
-import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.AnalogListener;
@@ -27,8 +25,6 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
-import com.jme3.math.Triangle;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.scene.Geometry;
@@ -41,12 +37,7 @@ import com.jme3.texture.Texture;
 import com.jme3.util.SkyFactory;
 import com.leapmotion.leap.Controller;
 import de.lessvoid.nifty.Nifty;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.xml.parsers.ParserConfigurationException;
 import mygame.Controller.StartScreenController;
 import mygame.model.SettingsIO;
 import tonegod.gui.core.Screen;
@@ -87,7 +78,23 @@ public class Main extends SimpleApplication {
     float global = 0;
     Geometry pointer2;
     BoundingBox test;
-    Geometry pickUpBox1;
+    static Geometry pickUpBox1;
+    static Material materialPickUpActive;
+
+    public static Material getMaterialPickUpActive() {
+        return materialPickUpActive;
+    }
+
+    public static void setMaterialPickUpActive(Material materialPickUpActive) {
+        Main.materialPickUpActive = materialPickUpActive;
+    }
+    public static Geometry getPickUpBox1() {
+        return pickUpBox1;
+    }
+
+    public static void setPickUpBox1(Geometry pickUpBox1) {
+        Main.pickUpBox1 = pickUpBox1;
+    }
     public int winCount = 0;
     Nifty nifty;
     static AudioNode music;
@@ -97,7 +104,9 @@ public class Main extends SimpleApplication {
     private Node tools;
     private Node tableNode;
     private RigidBodyControl floor_phy;
+    private RigidBodyControl releaseArea_phy;
     private Box floor;
+    private Box releaseArea;
     private Quaternion oldRotate = Quaternion.ZERO;
 //    private List<Vector3f> startPhysicElementPositions = new ArrayList<Vector3f>();
 //    private List<RigidBodyControl> physicObjects = new ArrayList<RigidBodyControl>();
@@ -108,7 +117,15 @@ public class Main extends SimpleApplication {
     static Vector3f cameraRotationRPY = new Vector3f(Vector3f.ZERO);
     static Vector3f cameraPositionXYZ = new Vector3f(Vector3f.ZERO);
     private static boolean leftHandActive = false;
+    private static Spatial pickUpElement;
 
+    public static Spatial getPickUpElement() {
+        return pickUpElement;
+    }
+
+    public static void setPickUpElement(Spatial pickUpElement) {
+        Main.pickUpElement = pickUpElement;
+    }
     public static Vector3f getCameraPositionXYZ() {
         return cameraPositionXYZ;
     }
@@ -201,7 +218,17 @@ public class Main extends SimpleApplication {
         bulletAppState.getPhysicsSpace().add(floor_phy);
 
     }
+    public void initReleaseArea() {
+        Geometry releaseAreaGeo = new Geometry("Release area", releaseArea);
+        releaseAreaGeo.setMaterial(floor_mat);
+        releaseAreaGeo.setLocalTranslation(12f, -0.1f, 1f);
+        tableNode.attachChild(releaseAreaGeo);
+        /* Make the floor physical with mass 0.0f! */
+        releaseArea_phy = new RigidBodyControl(0.0f);
+        releaseAreaGeo.addControl(releaseArea_phy);
+        bulletAppState.getPhysicsSpace().add(releaseArea_phy);
 
+    }
     public void initMaterials() {
         floor_mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         TextureKey key3 = new TextureKey("Textures/Terrain/Pond/Pond.jpg");
@@ -227,14 +254,28 @@ public class Main extends SimpleApplication {
         inputManager.addListener(analogListener, "pick up");
         inputManager.addListener(analogListener, "reset");
         floor = new Box(10f, 0.1f, 5f);
+        releaseArea = new Box(5f,0.1f,5f);
         initMaterials();
         initFloor();
+        initReleaseArea();
         Arrow arrow = new Arrow(new Vector3f(0, 2, 2));
         Arrow arrow2 = new Arrow(new Vector3f(0, 2, 2));
         //Box b = new Box(1,1,1);
         Box b1 = new Box(0.1f, 0.1f, 3);
         Box b2 = new Box(0.1f, 0.1f, 3);
         Box pickUp1 = new Box(0.5f, 0.5f, 0.5f);
+//        assetManager.registerLocator("http://better-web.pl/test/HeartAfter.zip", 
+//                             HttpZipLocator.class);
+//        setPickUpElement(assetManager.loadModel("Human Heart.obj"));
+//        getPickUpElement().scale(0.40f); // prevent that collision mesh is smaller than object representation(texture)
+//        CollisionShape shapeBeforeScale = CollisionShapeFactory.createDynamicMeshShape(pickUpElement);
+//        getPickUpElement().scale(0.40f);
+      
+        setMaterialPickUpActive(new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md"));
+       
+        getMaterialPickUpActive().setTexture("LightMap", assetManager.loadTexture(
+                "Models/HumanHeart-color.jpg"));
+//        getPickUpElement().setMaterial(matHeart);
         pickUpBox1 = new Geometry("Brick 1", pickUp1);
         pointer1 = new Geometry("Pointer Left", b1);
         pointer2 = new Geometry("Pointer Right", b2);
@@ -250,14 +291,17 @@ public class Main extends SimpleApplication {
 
         pointer1.setMaterial(mat);
         pointer2.setMaterial(mat2);
-        pickUpBox1.setMaterial(mat3);
+        pickUpBox1.setMaterial(getMaterialPickUpActive());
 
         BoxCollisionShape boxShape = new BoxCollisionShape(new Vector3f(0.5f, 0.5f, 0.5f));
+        
         brick_phy = new RigidBodyControl(boxShape, 10f);
         brick_phy.setKinematic(false);
         toolLeft = new RigidBodyControl(0.1f);
         toolRight = new RigidBodyControl(0.1f);
-        pickUpBox1.setLocalTranslation(new Vector3f(0f, 1f, 0f));
+//        pickUpElement.setLocalTranslation(new Vector3f(0f, 1f, 0f));
+        pickUpBox1.setLocalTranslation(new Vector3f(0f, 5f, 0f));
+//        getPickUpElement().addControl(brick_phy);
         pickUpBox1.addControl(brick_phy);
 
         pointer1.addControl(toolLeft);
@@ -325,7 +369,7 @@ public class Main extends SimpleApplication {
         // attach the Nifty display to the gui view port as a processor
         guiViewPort.addProcessor(niftyDisplay);
         // disable the fly cam
-        //flyCam.setDragToRotate(true);
+        flyCam.setDragToRotate(true);
     }
 
     @Override
@@ -431,6 +475,24 @@ public class Main extends SimpleApplication {
         {
             brick_phy.setPhysicsLocation(Vector3f.ZERO);
         }
+//       brick_phy.setAngularDamping(0f);
+//       brick_phy.setAngularFactor(0f);
+//       brick_phy.setAngularSleepingThreshold(0f);
+//       brick_phy.setAngularVelocity(Vector3f.ZERO);
+//       brick_phy.setApplyPhysicsLocal(false);
+//       brick_phy.setCcdMotionThreshold(0f);
+//       brick_phy.setCcdSweptSphereRadius(0f);
+//       brick_phy.setDamping(0f,0f);
+//       brick_phy.setFriction(0f);
+//       brick_phy.setGravity(Vector3f.ZERO);
+//       brick_phy.setKinematic(false);
+//       brick_phy.setKinematicSpatial(false);
+//       brick_phy.setLinearDamping(0f);
+//       brick_phy.setLinearSleepingThreshold(0f);
+//       brick_phy.setLinearVelocity(Vector3f.ZERO);
+//       brick_phy.setRestitution(0f);
+//       brick_phy.setSleepingThresholds(0f, 0f);
+       
         //Camera rotation by left hand RPY
 //        test = (BoundingBox) pickUpBox1.getModelBound();
         Quaternion qatRotationCamera = new Quaternion().fromAngles(getCameraRotationRPY().x, 0, getCameraRotationRPY().z);
@@ -455,8 +517,9 @@ public class Main extends SimpleApplication {
                 qatRotationCameraLocal.mult(tempVector, tempVector);
                 System.out.println("VECTOR:"+tempVector.toString());
                 brick_phy.setPhysicsRotation(qatRotationCameraLocal);
-                //TODO : zrobic tak aby po podniesieniu reki klocek pozostawal
-                //brick_phy.setPhysicsLocation(tempVector);
+                //TODO : zrobic tak aby po podniesieniu reki klocekreleaseArea_phy.setPhysicsLocation(tempVector); pozostawal
+                brick_phy.setPhysicsLocation(tempVector);
+              
                 
            
         } else {
@@ -466,6 +529,7 @@ public class Main extends SimpleApplication {
             startBox1Position = brick_phy.getPhysicsLocation().clone();
         }
         floor_phy.setPhysicsRotation(qatRotationCameraLocal);
+        releaseArea_phy.setPhysicsRotation(releaseArea_phy.getPhysicsRotation().subtract(qatRotationCamera));
 
         //pickUpBox1.set(qatRotationCameraLocal);
         //floor_phy.setPhysicsLocation(new Vector3f(0, getCameraRotationRPY().y, 0));
@@ -539,8 +603,8 @@ public class Main extends SimpleApplication {
             pickUpBox1.setMaterial(matActive);
         } else {
             Material matActive = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-            matActive.setColor("Color", ColorRGBA.Orange);
-            pickUpBox1.setMaterial(matActive);
+            pickUpBox1.setMaterial(getMaterialPickUpActive());
+            
         }
 
     }
