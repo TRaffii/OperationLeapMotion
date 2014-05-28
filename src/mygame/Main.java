@@ -3,6 +3,7 @@ package mygame;
 import mygame.Controller.LeapListener;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.TextureKey;
+import com.jme3.asset.plugins.HttpZipLocator;
 import com.jme3.audio.AudioNode;
 import com.jme3.collision.CollisionResults;
 import com.jme3.material.Material;
@@ -89,7 +90,9 @@ public class Main extends SimpleApplication {
     Geometry pickUpBox1;
     public int winCount = 0;
     Nifty nifty;
-    AudioNode music;
+    static AudioNode music;
+
+
     private Node pickables;
     private Node tools;
     private Node tableNode;
@@ -116,6 +119,13 @@ public class Main extends SimpleApplication {
 
     public static Vector3f getCameraRotationRPY() {
         return cameraRotationRPY;
+    }
+    public static AudioNode getMusic() {
+        return music;
+    }
+
+    public static void setMusic(AudioNode music) {
+        Main.music = music;
     }
 
     public static void setCameraRotationRPY(Vector3f cameraRotationRPY) {
@@ -179,7 +189,7 @@ public class Main extends SimpleApplication {
         app.setSettings(settings);
         app.start();
     }
-
+    
     public void initFloor() {
         Geometry floor_geo = new Geometry("Floor", floor);
         floor_geo.setMaterial(floor_mat);
@@ -304,7 +314,7 @@ public class Main extends SimpleApplication {
          */
         nifty = niftyDisplay.getNifty();
         System.out.println(nifty.getVersion());
-        StartScreenController startScreenState = new StartScreenController(music);
+        StartScreenController startScreenState = new StartScreenController();
         startScreenState.initialize(stateManager, this);
         stateManager.attach(startScreenState);
         /**
@@ -315,7 +325,7 @@ public class Main extends SimpleApplication {
         // attach the Nifty display to the gui view port as a processor
         guiViewPort.addProcessor(niftyDisplay);
         // disable the fly cam
-        flyCam.setDragToRotate(true);
+        //flyCam.setDragToRotate(true);
     }
 
     @Override
@@ -446,7 +456,7 @@ public class Main extends SimpleApplication {
                 System.out.println("VECTOR:"+tempVector.toString());
                 brick_phy.setPhysicsRotation(qatRotationCameraLocal);
                 //TODO : zrobic tak aby po podniesieniu reki klocek pozostawal
-                brick_phy.setPhysicsLocation(tempVector);
+                //brick_phy.setPhysicsLocation(tempVector);
                 
            
         } else {

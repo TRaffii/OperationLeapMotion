@@ -33,7 +33,6 @@ public class StartScreenController extends AbstractAppState implements ScreenCon
     private Screen screen;
     private Element control;
     private SimpleApplication app;
-    private AudioNode musicHandler;
     Date effectStart;
     private boolean succesfullInteration = false;
 
@@ -57,9 +56,6 @@ public class StartScreenController extends AbstractAppState implements ScreenCon
     public StartScreenController() {
     }
 
-    public StartScreenController(AudioNode music) {
-        musicHandler = music;
-    }
 
     public void OptionsOn() {
         effectStart = new Date();
@@ -68,7 +64,7 @@ public class StartScreenController extends AbstractAppState implements ScreenCon
     public void OptionsOff() {
         if (activateButton()) {
 
-            nifty.fromXml("Interface/options.xml", "options", new OptionsScreenController(app, musicHandler));
+            nifty.fromXml("Interface/options.xml", "options", new OptionsScreenController(app));
             //nifty.gotoScreen("options");
 
         }

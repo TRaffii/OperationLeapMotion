@@ -1,43 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nifty>
-  <screen id="options" controller="mygame.Controller.OptionsScreenController">
-   <layer id="background" childLayout="center">
-      <image filename="Interface/operation-front.jpg" mageMode="resize:40,490,110,170,40,560,40,270,40,560,40,40" width="100%" height="100%"></image>
-    </layer>
-      <layer id="foreground" childLayout="vertical" backgroundColor="#0000" > 
-          <text width="100%" height="5%" textHAlign="left" textVAlign="top" font="Interface/Fonts/Default.fnt"  text="Choose music state" backgroundColor="#33af" />
-      <panel id="panel_bottom" height="25%" width="75%" align="center" childLayout="horizontal"> 
+    <screen id="options" controller="mygame.Controller.OptionsScreenController">
+        <layer id="background" childLayout="center">
+            <image filename="Interface/operation-front.jpg" mageMode="resize:40,490,110,170,40,560,40,270,40,560,40,40" width="100%" height="100%"></image>
+        </layer>
+        <layer id="foreground" childLayout="vertical" backgroundColor="#0000" > 
+            <text width="100%" height="5%" textHAlign="left" textVAlign="top" font="Interface/Fonts/Default.fnt"  text="Choose music state" backgroundColor="#33af" />
+            <panel id="panel_bottom" height="25%" width="75%" align="center" childLayout="horizontal"> 
         
-          <panel id="panel_left" width="3%"  childLayout="vertical" >  
-        <!-- spacer -->
-         </panel> 
-        <panel backgroundColor="#49423d" id="panel_bottom_left" height="50%" width="40%" valign="center" childLayout="center">  
-          <effect>
-                <onHover  name="colorPulsate" startColor="#49423d" length="2500" endColor="#9ede00" cycle = "false" period = "3000" onEndEffect="MusicON()" onStartEffect="handMovedOut()"/>
-            </effect>           
-            <text  text="ON" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
-        </panel>
-         <panel id="panel_left" width="10%"  childLayout="vertical" >  
-        <!-- spacer -->
-         </panel>
-        <panel backgroundColor="#49423d" id="panel_bottom_center" height="50%" width="40%" valign="center" childLayout="center">  
-          <effect>
-                <onHover  name="colorPulsate" startColor="#49423d" length="2500" endColor="#ff8f32" cycle = "false" period = "3000" onEndEffect="MusicOff()" onStartEffect="handMovedOut()"/>
-            </effect>           
-            <text  text="Off" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
-        </panel>
-         <panel id="panel_left" width="3%"  childLayout="vertical" >  
-        <!-- spacer -->
-         </panel>
+                <panel id="panel_left" width="3%"  childLayout="vertical" >  
+                    <!-- spacer -->
+                </panel> 
+                <panel backgroundColor="#49423d" id="panel_bottom_left" height="50%" width="40%" valign="center" childLayout="center">  
+                    <effect>
+                        <onHover  name="colorPulsate" startColor="#49423d" length="2500" endColor="#9ede00" cycle = "false" period = "3000" onEndEffect="MusicON()" onStartEffect="handMovedOut()"/>
+                    </effect>           
+                    <text  text="ON" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
+                </panel>
+                <panel id="panel_left" width="10%"  childLayout="vertical" >  
+                    <!-- spacer -->
+                </panel>
+                <panel backgroundColor="#49423d" id="panel_bottom_center" height="50%" width="40%" valign="center" childLayout="center">  
+                    <effect>
+                        <onHover  name="colorPulsate" startColor="#49423d" length="2500" endColor="#ff8f32" cycle = "false" period = "3000" onEndEffect="MusicOff()" onStartEffect="handMovedOut()"/>
+                    </effect>           
+                    <text  text="Off" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
+                </panel>
+                <panel id="panel_left" width="3%"  childLayout="vertical" >  
+                    <!-- spacer -->
+                </panel>
        
-      </panel>
-       <panel backgroundColor="#49423d" id="panel_return" height="30%" width="100%" valign="center" childLayout="center">  
-          <effect>
-                <onHover  name="colorPulsate" startColor="#49423d" length="2500" endColor="#9ede00" cycle = "false" period = "3000" onEndEffect="BackToMainMenu()" onStartEffect="handMovedOut()"/>
-            </effect>           
-            <text  text="Back to main menu" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
-        </panel>
-    </layer>
+            </panel>
+            <text width="100%" height="5%" textHAlign="left" textVAlign="top" font="Interface/Fonts/Default.fnt"  text="Choose cube color(require internet connection!)" backgroundColor="#33af" />
+
+            <panel  height="25%" width="75%" align="center" childLayout="horizontal"> 
+        
+                <panel id="panel_left" width="3%"  childLayout="vertical" >  
+                    <!-- spacer -->
+                </panel> 
+                <panel backgroundColor="#49423d"  height="50%" width="40%" valign="center" childLayout="center">  
+                    <effect>
+                        <onHover  name="colorPulsate" startColor="#49423d" length="2500" endColor="#0123F3" cycle = "false" period = "3000" onEndEffect="BlueBox()" onStartEffect="handMovedOut()"/>
+                    </effect>           
+                    <text  text="Blue Boxes" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
+                </panel>
+                <panel id="panel_left1" width="10%"  childLayout="vertical" >  
+                    <!-- spacer -->
+                </panel>
+                <panel backgroundColor="#49423d"  height="50%" width="40%" valign="center" childLayout="center">  
+                    <effect>
+                        <onHover  name="colorPulsate" startColor="#49423d" length="2500" endColor="#FA6502" cycle = "false" period = "3000" onEndEffect="OrangeBox()" onStartEffect="handMovedOut()"/>
+                    </effect>           
+                    <text  text="Orange Boxes" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
+                </panel>
+                <panel id="panel_left2" width="3%"  childLayout="vertical" >  
+                    <!-- spacer -->
+                </panel>
+       
+            </panel>
+            <panel backgroundColor="#49423d" id="panel_return" height="30%" width="100%" valign="center" childLayout="center">  
+                <effect>
+                    <onHover  name="colorPulsate" startColor="#49423d" length="2500" endColor="#9ede00" cycle = "false" period = "3000" onEndEffect="BackToMainMenu()" onStartEffect="handMovedOut()"/>
+                </effect>           
+                <text  text="Back to main menu" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
+            </panel>
+        </layer>
  
-  </screen>
+    </screen>
 </nifty>

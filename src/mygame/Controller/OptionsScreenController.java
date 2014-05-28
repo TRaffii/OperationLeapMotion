@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
+import mygame.Main;
 import mygame.model.DatabaseManager;
 import mygame.model.SettingsIO;
 import mygame.model.Users;
@@ -32,10 +33,8 @@ public class OptionsScreenController extends AbstractAppState implements ScreenC
     boolean musicPlay = false;
     Nifty nifty;
     java.util.Date effectStart;
-    AudioNode music;
 
     public void bind(Nifty nifty, Screen screen) {
-        //TODO MAKE AUDIO LIVE
         this.nifty = nifty;
         java.util.Date utilDate = new java.util.Date();
         java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
@@ -47,9 +46,8 @@ public class OptionsScreenController extends AbstractAppState implements ScreenC
     public OptionsScreenController() {
     }
 
-    public OptionsScreenController(SimpleApplication app, AudioNode music) {
+    public OptionsScreenController(SimpleApplication app) {
         this.app = app;
-        this.music = music;
     }
 
     public String getPlayers() {
@@ -82,9 +80,9 @@ public class OptionsScreenController extends AbstractAppState implements ScreenC
                 } catch (ParserConfigurationException ex) {
                     Logger.getLogger(OptionsScreenController.class.getName()).log(Level.SEVERE, null, ex);
                 }
-
-                music = new AudioNode(app.getAssetManager(), "Sounds/HappyBee.wav", true);
-                music.play();
+                
+                Main.setMusic(new AudioNode(app.getAssetManager(), "Sounds/HappyBee.wav", true));
+                Main.getMusic().play();
                 musicPlay = true;
 
             }
@@ -97,7 +95,21 @@ public class OptionsScreenController extends AbstractAppState implements ScreenC
             nifty.fromXml("Interface/screen.xml", "start");
         }
     }
-
+    public void OrangeBox()
+    {
+        if (activateButton()) {
+        
+        }
+        
+    }
+    
+    public void BlueBox()
+    {
+        if (activateButton()) {
+            
+        }
+        
+    }
     public void MusicOff() {
         if (activateButton()) {
             SettingsIO settingFile = new SettingsIO("assets/Settings/ProgramSettings.xml");
@@ -106,11 +118,7 @@ public class OptionsScreenController extends AbstractAppState implements ScreenC
             } catch (ParserConfigurationException ex) {
                 Logger.getLogger(OptionsScreenController.class.getName()).log(Level.SEVERE, null, ex);
             }
-//                AudioNode music = new AudioNode(app.getAssetManager(), "Sounds/HappyBee.wav", true);
-//                app.getAudioRenderer().stopSource(music);
-//                
-//                music.stop();
-            music.stop();
+            Main.getMusic().stop();
             musicPlay = false;
         }
 
