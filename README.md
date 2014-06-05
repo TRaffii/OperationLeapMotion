@@ -29,5 +29,6 @@
 7.	Refaktoryzacja - ciągła refaktoryzacja
     a) zastosowanie MVC - cały czas 
 8.  GUI dodanie mozliwosci wyłączenia / włączenia muzyki - zapisanie w pliku - done
-9.  Dodanie punktacji TODO
+9.  Dodanie punktacji - 05.06.2014 - punktacja na bazie czasu - im szybciej tym lepiej
+    Dodanie punktacji do bazy danych z data uzyskania czasu - 05.06.2014
 10.  Lista userow z punktami TODO
