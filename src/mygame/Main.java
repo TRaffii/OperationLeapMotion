@@ -66,6 +66,15 @@ public class Main extends SimpleApplication {
     //Material
     Material floor_mat;
     LeapListener listener;
+    private static boolean MainGameWorking = false;
+
+    public static boolean isMainGameWorking() {
+        return MainGameWorking;
+    }
+
+    public static void setMainGameWorking(boolean MainGameWorking) {
+        Main.MainGameWorking = MainGameWorking;
+    }
     boolean isLeftPointerInCollision = false;
     boolean isRightPointerInCollision = false;
     long timeSpan = Calendar.getInstance().getTimeInMillis();
@@ -88,6 +97,7 @@ public class Main extends SimpleApplication {
     public static void setMaterialPickUpActive(Material materialPickUpActive) {
         Main.materialPickUpActive = materialPickUpActive;
     }
+
     public static Geometry getPickUpBox1() {
         return pickUpBox1;
     }
@@ -98,8 +108,6 @@ public class Main extends SimpleApplication {
     public int winCount = 0;
     Nifty nifty;
     static AudioNode music;
-
-
     private Node pickables;
     private Node tools;
     private Node tableNode;
@@ -126,6 +134,7 @@ public class Main extends SimpleApplication {
     public static void setPickUpElement(Spatial pickUpElement) {
         Main.pickUpElement = pickUpElement;
     }
+
     public static Vector3f getCameraPositionXYZ() {
         return cameraPositionXYZ;
     }
@@ -137,6 +146,7 @@ public class Main extends SimpleApplication {
     public static Vector3f getCameraRotationRPY() {
         return cameraRotationRPY;
     }
+
     public static AudioNode getMusic() {
         return music;
     }
@@ -206,7 +216,7 @@ public class Main extends SimpleApplication {
         app.setSettings(settings);
         app.start();
     }
-    
+
     public void initFloor() {
         Geometry floor_geo = new Geometry("Floor", floor);
         floor_geo.setMaterial(floor_mat);
@@ -218,6 +228,7 @@ public class Main extends SimpleApplication {
         bulletAppState.getPhysicsSpace().add(floor_phy);
 
     }
+
     public void initReleaseArea() {
         Geometry releaseAreaGeo = new Geometry("Release area", releaseArea);
         releaseAreaGeo.setMaterial(floor_mat);
@@ -229,6 +240,7 @@ public class Main extends SimpleApplication {
         bulletAppState.getPhysicsSpace().add(releaseArea_phy);
 
     }
+
     public void initMaterials() {
         floor_mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         TextureKey key3 = new TextureKey("Textures/Terrain/Pond/Pond.jpg");
@@ -251,10 +263,12 @@ public class Main extends SimpleApplication {
         flyCam.setMoveSpeed(10);
         inputManager.addMapping("pick up", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addMapping("reset", new KeyTrigger(KeyInput.KEY_SPACE));
+        inputManager.addMapping("escape", new KeyTrigger(KeyInput.KEY_LCONTROL));
         inputManager.addListener(analogListener, "pick up");
         inputManager.addListener(analogListener, "reset");
+        inputManager.addListener(analogListener, "escape");
         floor = new Box(10f, 0.1f, 5f);
-        releaseArea = new Box(5f,0.1f,5f);
+        releaseArea = new Box(5f, 0.1f, 5f);
         initMaterials();
         initFloor();
         initReleaseArea();
@@ -270,9 +284,9 @@ public class Main extends SimpleApplication {
 //        getPickUpElement().scale(0.40f); // prevent that collision mesh is smaller than object representation(texture)
 //        CollisionShape shapeBeforeScale = CollisionShapeFactory.createDynamicMeshShape(pickUpElement);
 //        getPickUpElement().scale(0.40f);
-      
+
         setMaterialPickUpActive(new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md"));
-       
+
         getMaterialPickUpActive().setTexture("LightMap", assetManager.loadTexture(
                 "Models/HumanHeart-color.jpg"));
 //        getPickUpElement().setMaterial(matHeart);
@@ -294,7 +308,7 @@ public class Main extends SimpleApplication {
         pickUpBox1.setMaterial(getMaterialPickUpActive());
 
         BoxCollisionShape boxShape = new BoxCollisionShape(new Vector3f(0.5f, 0.5f, 0.5f));
-        
+
         brick_phy = new RigidBodyControl(boxShape, 10f);
         brick_phy.setKinematic(false);
         toolLeft = new RigidBodyControl(0.1f);
@@ -380,7 +394,9 @@ public class Main extends SimpleApplication {
     }
     private AnalogListener analogListener = new AnalogListener() {
         public void onAnalog(String name, float value, float tpf) {
-
+            if (name.equals("escape")) {
+                MainGameWorking = false;
+            }
             if (name.equals("pick up")) {         // test?
                 //        brick_phy.setPhysicsLocation(new Vector3f(0, 4f, 0));
 
@@ -492,7 +508,7 @@ public class Main extends SimpleApplication {
 //       brick_phy.setLinearVelocity(Vector3f.ZERO);
 //       brick_phy.setRestitution(0f);
 //       brick_phy.setSleepingThresholds(0f, 0f);
-       
+
         //Camera rotation by left hand RPY
 //        test = (BoundingBox) pickUpBox1.getModelBound();
         Quaternion qatRotationCamera = new Quaternion().fromAngles(getCameraRotationRPY().x, 0, getCameraRotationRPY().z);
@@ -511,20 +527,20 @@ public class Main extends SimpleApplication {
 //                    oldRotate = qatRotationCameraLocal;
 //                    isRotationStart = true;
 //                }
-               Vector3f tempVector = startBox1Position.clone();
-               System.out.println("QUAT:"+qatRotationCameraLocal.subtract(oldRotate).toString());
-                //qatRotationCameraLocal.subtract(oldRotate).mult(tempVector, tempVector);
-                qatRotationCameraLocal.mult(tempVector, tempVector);
-                System.out.println("VECTOR:"+tempVector.toString());
-                brick_phy.setPhysicsRotation(qatRotationCameraLocal);
-                //TODO : zrobic tak aby po podniesieniu reki klocekreleaseArea_phy.setPhysicsLocation(tempVector); pozostawal
-                brick_phy.setPhysicsLocation(tempVector);
-              
-                
-           
+            Vector3f tempVector = startBox1Position.clone();
+            System.out.println("QUAT:" + qatRotationCameraLocal.subtract(oldRotate).toString());
+            //qatRotationCameraLocal.subtract(oldRotate).mult(tempVector, tempVector);
+            qatRotationCameraLocal.mult(tempVector, tempVector);
+            System.out.println("VECTOR:" + tempVector.toString());
+            brick_phy.setPhysicsRotation(qatRotationCameraLocal);
+            //TODO : zrobic tak aby po podniesieniu reki klocekreleaseArea_phy.setPhysicsLocation(tempVector); pozostawal
+            brick_phy.setPhysicsLocation(tempVector);
+
+
+
         } else {
-             oldRotate = qatRotationCameraLocal;
-                isRotationStart = false;
+            oldRotate = qatRotationCameraLocal;
+            isRotationStart = false;
 //             System.out.println(brick_phy.getPhysicsLocation());
             startBox1Position = brick_phy.getPhysicsLocation().clone();
         }
@@ -604,7 +620,7 @@ public class Main extends SimpleApplication {
         } else {
             Material matActive = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
             pickUpBox1.setMaterial(getMaterialPickUpActive());
-            
+
         }
 
     }

@@ -38,11 +38,12 @@ public class DatabaseManager {
         try {
             conn = DriverManager.getConnection(DB_URL);
             stat = conn.createStatement();
+            createTables();
         } catch (SQLException e) {
             System.err.println("Unable to open connection ");
             e.printStackTrace();
         }
-        createTables();
+        
     }
 
     public boolean createTables() {
@@ -75,7 +76,7 @@ public class DatabaseManager {
     public List<Users> selectUsers() {
         List<Users> users = new LinkedList<Users>();
         try {
-            ResultSet result = stat.executeQuery("SELECT * FROM users");
+            ResultSet result = stat.executeQuery("SELECT * FROM users ORDER BY result DESC");
             int id;
             String userName;
             int resultVar;

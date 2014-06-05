@@ -6,6 +6,7 @@ and open the template in the editor.
 <nifty>
 <screen id="mainGame"  controller="mygame.Controller.MainGameWindowController">
        <layer id="GLayer0" childLayout="absolute">
+           <text id="timeText"  color="#f00" font="Interface/Fonts/Default.fnt" width="50%" height="5%" />
           <!--  <control name="textfield" id="GTextfield2"  height="42px" width="173px" y="11" x="7">
                  <interact onChange="vector(x)" />
             </control>

@@ -22,6 +22,7 @@ import de.lessvoid.nifty.screen.ScreenController;
 import de.lessvoid.nifty.tools.Color;
 import java.util.Date;
 import mygame.Main;
+import mygame.model.DatabaseManager;
 
 /**
  *
@@ -32,6 +33,7 @@ public class StartScreenController extends AbstractAppState implements ScreenCon
     private Nifty nifty;
     private Screen screen;
     private Element control;
+    private AppStateManager appStateManager;
     private SimpleApplication app;
     Date effectStart;
     private boolean succesfullInteration = false;
@@ -48,7 +50,11 @@ public class StartScreenController extends AbstractAppState implements ScreenCon
     public void StartGameEnd(String nextScreen) {
         if (activateButton()) {
 
-            nifty.fromXml("Interface/" + nextScreen + ".xml", nextScreen);
+            MainGameWindowController mainGame = new MainGameWindowController();
+            mainGame.initialize(appStateManager, app);
+            appStateManager.detach(this);
+            appStateManager.attach(mainGame);
+            nifty.fromXml("Interface/" + nextScreen + ".xml", nextScreen,mainGame);
             nifty.gotoScreen(nextScreen);
         }
     }
@@ -99,10 +105,12 @@ public class StartScreenController extends AbstractAppState implements ScreenCon
     @Override
     public void initialize(AppStateManager stateManger, Application app) {
         super.initialize(stateManger, app);
+        this.appStateManager = stateManger;
         this.app = (SimpleApplication) app;
     }
 
     @Override
     public void update(float tpf) {
+        
     }
 }
