@@ -14,7 +14,7 @@
 4.  Obsługa gry:
     a) Przechwytywanie rąk jako kontrolera - done zajecia nr 3 
     b) Wykorzystanie lewej ręki do obracania  -  done - problem z powrotem do stanu startowego zajecia nr 3
-        - obiekty na podłodze nie poruszają się wraz z podłągą TODO 
+        - obiekty na podłodze nie poruszają się wraz z podłągą 
         - rotacja chwytaka w stosunku do obrotu kamery
         - kąty eulera,kwateriony i inna matematyka. ...  - chyba done
     c) wykrywanie kolizji - done zajecia nr 4
@@ -31,4 +31,4 @@
 8.  GUI dodanie mozliwosci wyłączenia / włączenia muzyki - zapisanie w pliku - done
 9.  Dodanie punktacji - 05.06.2014 - punktacja na bazie czasu - im szybciej tym lepiej
     Dodanie punktacji do bazy danych z data uzyskania czasu - 05.06.2014
-10.  Lista userow z punktami TODO
+10.  Lista z punktacją oraz wyswietlenie punktacji po wygranej
