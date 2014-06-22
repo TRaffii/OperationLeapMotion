@@ -76,7 +76,7 @@ public class DatabaseManager {
     public List<Users> selectUsers() {
         List<Users> users = new LinkedList<Users>();
         try {
-            ResultSet result = stat.executeQuery("SELECT * FROM users ORDER BY result DESC");
+            ResultSet result = stat.executeQuery("SELECT * FROM users ORDER BY result");
             int id;
             String userName;
             int resultVar;

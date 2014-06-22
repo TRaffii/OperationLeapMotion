@@ -35,10 +35,15 @@ public class MainGameWindowController extends AbstractAppState implements Screen
     SimpleDateFormat dateFormatBegin;
     Element timeElement;
     DateTime dateBegin;
+    Integer totalTime;
+    Integer currentTime;
+    Integer FIVE_SEC = 5000;
     DatabaseManager handler = new DatabaseManager();
     Application app;
     Nifty nifty;
     AppStateManager stateManager;
+    String resultString;
+
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
         super.initialize(stateManager, app);
@@ -53,29 +58,41 @@ public class MainGameWindowController extends AbstractAppState implements Screen
         this.nifty = nifty;
     }
 
-    public String getTime() {
-        return "aa";
-    }
     @Override
     public void update(float tpf) {
-        //TODO: implement behavior during runtime
-        String tempSeconds = (Seconds.secondsBetween(dateBegin, new DateTime()).getSeconds()%60)+"";
-        String tempMinutes = (Minutes.minutesBetween(dateBegin, new DateTime()).getMinutes()%60)+"";
-        timeElement.getRenderer(TextRenderer.class).setText("Time "+tempMinutes+":"+tempSeconds);
-        if(!Main.isMainGameWorking())
-        {
+        String tempSeconds = (Seconds.secondsBetween(dateBegin, new DateTime()).getSeconds() % 60) + "";
+        String tempMinutes = (Minutes.minutesBetween(dateBegin, new DateTime()).getMinutes() % 60) + "";
+        timeElement.getRenderer(TextRenderer.class).setText("Time " + tempMinutes + ":" + tempSeconds);
+        if (!Main.isMainGameWorking()) {
+            nifty.registerMouseCursor("hand", "Interface/mouse-cursor-hand.png", 5, 4);
+            Element popup = nifty.createPopup("popupWin");
+            nifty.showPopup(nifty.getCurrentScreen(), popup.getId(), null);
+            Element timeResult = popup.findElementByName("timeTextResult");
+            timeResult.getRenderer(TextRenderer.class).setText(resultString);
             java.util.Date date = new java.util.Date();
-            
-            Integer result = Integer.parseInt(tempMinutes)*60+Integer.parseInt(tempSeconds);
-            handler.insertUser("test", result, new java.sql.Date(date.getTime()));
-            StartScreenController startScreen = new StartScreenController();
-            startScreen.initialize(stateManager, app);
-            stateManager.detach(this);
-            Main.getApp().getInputManager().setCursorVisible(true);
-            Main.getApp().getFlyByCamera().setDragToRotate(true);
-            stateManager.attach(startScreen);
-            nifty.fromXml("Interface/screen.xml", "start",startScreen);
-            nifty.gotoScreen("start");
+            if (resultString == null) {
+                resultString = "You Win in: " + tempMinutes + ":" + tempSeconds;
+                Integer result = Integer.parseInt(tempMinutes) * 60 + Integer.parseInt(tempSeconds);
+                handler.insertUser("test", result, new java.sql.Date(date.getTime()));
+            }
+
+            if (totalTime == null) {
+                totalTime = (int) System.currentTimeMillis();
+            }
+            currentTime = (int) System.currentTimeMillis();
+            if (currentTime - totalTime >= FIVE_SEC) {
+                // do something at 20 secs
+                totalTime = currentTime; // Reset to now.
+                StartScreenController startScreen = new StartScreenController();
+                startScreen.initialize(stateManager, app);
+                stateManager.detach(this);
+                Main.resetToDefaultBoxPosition();
+                Main.getApp().getInputManager().setCursorVisible(true);
+                Main.getApp().getFlyByCamera().setDragToRotate(true);
+                stateManager.attach(startScreen);
+                nifty.fromXml("Interface/screen.xml", "start", startScreen);
+                nifty.gotoScreen("start");
+            }
         }
     }
 
@@ -89,9 +106,9 @@ public class MainGameWindowController extends AbstractAppState implements Screen
         dateFormatBegin = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
         dateBegin = new DateTime();
-        System.out.println("E:"+isEnabled());      
+        System.out.println("E:" + isEnabled());
         setEnabled(true);
-        System.out.println("IN"+isInitialized());
+        System.out.println("IN" + isInitialized());
 
 //        String temp = (Seconds.secondsBetween(dateBegin, new DateTime()).getSeconds()+ " seconds");
 //        timeElement.getRenderer(TextRenderer.class).setText(temp);

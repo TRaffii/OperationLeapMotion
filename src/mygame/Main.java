@@ -17,12 +17,14 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.MeshCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
+import com.jme3.collision.CollisionResult;
 import com.jme3.font.BitmapText;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.math.Matrix4f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
@@ -78,7 +80,9 @@ public class Main extends SimpleApplication {
     boolean isLeftPointerInCollision = false;
     boolean isRightPointerInCollision = false;
     long timeSpan = Calendar.getInstance().getTimeInMillis();
-    private RigidBodyControl brick_phy;
+    static private RigidBodyControl brick_phy;
+
+    
     private RigidBodyControl toolLeft;
     private RigidBodyControl toolRight;
     private Quaternion floorQuatRotate;
@@ -111,6 +115,7 @@ public class Main extends SimpleApplication {
     private Node pickables;
     private Node tools;
     private Node tableNode;
+    private Node releaseNode;
     private RigidBodyControl floor_phy;
     private RigidBodyControl releaseArea_phy;
     private Box floor;
@@ -231,9 +236,11 @@ public class Main extends SimpleApplication {
 
     public void initReleaseArea() {
         Geometry releaseAreaGeo = new Geometry("Release area", releaseArea);
-        releaseAreaGeo.setMaterial(floor_mat);
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", ColorRGBA.Red);
+        releaseAreaGeo.setMaterial(mat);
         releaseAreaGeo.setLocalTranslation(12f, -0.1f, 1f);
-        tableNode.attachChild(releaseAreaGeo);
+        releaseNode.attachChild(releaseAreaGeo);
         /* Make the floor physical with mass 0.0f! */
         releaseArea_phy = new RigidBodyControl(0.0f);
         releaseAreaGeo.addControl(releaseArea_phy);
@@ -249,16 +256,18 @@ public class Main extends SimpleApplication {
         tex3.setWrap(Texture.WrapMode.Repeat);
         floor_mat.setTexture("ColorMap", tex3);
     }
-
+    
     public void simpleInitApp() {
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
         pickables = new Node("Pickables");
         tools = new Node("Tools");
         tableNode = new Node("Table");
+        releaseNode = new Node("Release node");
         rootNode.attachChild(pickables);
         rootNode.attachChild(tools);
         rootNode.attachChild(tableNode);
+        rootNode.attachChild(releaseNode);
         setCameraPositionXYZ(new Vector3f(0, 3f, 12f));
         flyCam.setMoveSpeed(10);
         inputManager.addMapping("pick up", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
@@ -359,7 +368,7 @@ public class Main extends SimpleApplication {
 
         rootNode.attachChild(SkyFactory.createSky(
                 assetManager, "Textures/Sky/Bright/BrightSky.dds", false));
-        initCrossHairs();
+        //initCrossHairs();
         startBox1Position = brick_phy.getPhysicsLocation().clone();
 
     }
@@ -448,7 +457,10 @@ public class Main extends SimpleApplication {
 
         }
     };
-
+    static public void resetToDefaultBoxPosition()
+    {
+        brick_phy.setPhysicsLocation(new Vector3f(0, 0, 0));
+    }
     protected void initCrossHairs() {
         guiNode.detachAllChildren();
 
@@ -528,14 +540,15 @@ public class Main extends SimpleApplication {
 //                    isRotationStart = true;
 //                }
             Vector3f tempVector = startBox1Position.clone();
-            System.out.println("QUAT:" + qatRotationCameraLocal.subtract(oldRotate).toString());
-            //qatRotationCameraLocal.subtract(oldRotate).mult(tempVector, tempVector);
+            //System.out.println("QUAT:" + qatRotationCameraLocal.subtract(oldRotate).toString());
+           
             qatRotationCameraLocal.mult(tempVector, tempVector);
             System.out.println("VECTOR:" + tempVector.toString());
+            releaseArea_phy.setPhysicsLocation(tempVector.add(new Vector3f(10f, 0, 0)));
             brick_phy.setPhysicsRotation(qatRotationCameraLocal);
             //TODO : zrobic tak aby po podniesieniu reki klocekreleaseArea_phy.setPhysicsLocation(tempVector); pozostawal
             brick_phy.setPhysicsLocation(tempVector);
-
+            
 
 
         } else {
@@ -545,7 +558,8 @@ public class Main extends SimpleApplication {
             startBox1Position = brick_phy.getPhysicsLocation().clone();
         }
         floor_phy.setPhysicsRotation(qatRotationCameraLocal);
-        releaseArea_phy.setPhysicsRotation(releaseArea_phy.getPhysicsRotation().subtract(qatRotationCamera));
+        releaseArea_phy.setPhysicsRotation(qatRotationCameraLocal);
+        //releaseArea_phy.setPhysicsRotation(releaseArea_phy.getPhysicsRotation().subtract(qatRotationCamera));
 
         //pickUpBox1.set(qatRotationCameraLocal);
         //floor_phy.setPhysicsLocation(new Vector3f(0, getCameraRotationRPY().y, 0));
@@ -583,15 +597,22 @@ public class Main extends SimpleApplication {
         // 1. Reset results list.
 
         CollisionResults results = new CollisionResults();
+        CollisionResults resultsRelease = new CollisionResults();
         // 2. Aim the ray from cam loc to cam direction.
 
         // 3. Collect intersections between Ray and Shootables in results list.
         BoundingVolume bv = pickUpBox1.getWorldBound();
         tools.collideWith(bv, results);
+        releaseNode.collideWith(bv, resultsRelease);
+        for(CollisionResult col:resultsRelease)
+        {
+            results.addCollision(col);
+        }
 //        System.out.println("BoxPosition : "+brick_phy.getLinearVelocity());
         // 4. Print the results
         boolean foundLeftTool = false;
         boolean foundRightTool = false;
+        boolean releaseAreaCollision = false;
 //        System.out.println("Result :"+results.size());
         float averageZPosition = 0;
         for (int i = 0; i < results.size(); i++) {
@@ -604,7 +625,15 @@ public class Main extends SimpleApplication {
             } else if (party.equals("Pointer Right")) {
                 foundRightTool = true;
             }
-
+            else if(party.equals("Release area") && !leftHandActive)
+            {
+                releaseAreaCollision = true;
+            }
+            System.out.println(party);
+        }
+        if(releaseAreaCollision)
+        {
+             MainGameWorking = false;
         }
         if (foundLeftTool && foundRightTool) {
 //             System.out.println("CATCH");

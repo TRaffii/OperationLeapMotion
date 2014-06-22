@@ -1,64 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nifty xmlns="http://nifty-gui.sourceforge.net/nifty-1.3.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://nifty-gui.sourceforge.net/nifty-1.3.xsd http://nifty-gui.sourceforge.net/nifty-1.3.xsd">
-  <useStyles filename="nifty-default-styles.xml" />
-  <useControls filename="nifty-default-controls.xml" />
-   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
-   This demo shows a two-screen layout in Nifty's XML syntax.         
-   You see two screens with two layers each, contain several panels.  
-   The panels contain images, text, and controls (label and buttons). 
-   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
+    <useStyles filename="nifty-default-styles.xml" />
+    <useControls filename="nifty-default-controls.xml" />
+    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
+    This demo shows a two-screen layout in Nifty's XML syntax.         
+    You see two screens with two layers each, contain several panels.  
+    The panels contain images, text, and controls (label and buttons). 
+    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
   
-   +++++++++++++++++++++++++++++++++++++++ 
-   lay out the start screen/layers/panels  
-   +++++++++++++++++++++++++++++++++++++++ 
-  <screen id="start" controller="mygame.Controller.StartScreenController">
-    <layer id="background" childLayout="center">
-      <image filename="Interface/operation-front.jpg" mageMode="resize:40,490,110,170,40,560,40,270,40,560,40,40" width="100%" height="100%"></image>
-    </layer>
-    <layer id="foreground" childLayout="vertical" backgroundColor="#0000" > 
-      <panel id="panel_top" height="25%" width="75%" align="center" childLayout="center">  
-        <text text="Virtual operation with Leap Motion" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
-      </panel>
-      <panel valign="center" backgroundColor="#00000080" id="panel_mid" height="50%" width="75%" align="center" childLayout="center">       
-        <text text="Here goes some text describing the game and the rules and stuff. Incidentally, the text is quite long and needs to wrap at the end of lines. Here goes some text describing the game and the rules and stuff. Incidentally, the text is quite long and needs to wrap at the end of lines. Here goes some text describing the game and the rules and stuff. Incidentally, the text is quite long and needs to wrap at the end of lines." 
-        font="Interface/Fonts/Default.fnt" width="100%" height="100%" wrap="true" />
-      </panel>
-      <panel id="panel_bottom" height="25%" width="75%" align="center" childLayout="horizontal"> 
-        <panel id="panel_left1" width="3%"  childLayout="vertical" >  
-         spacer 
-         </panel> 
-        <panel backgroundColor="#49423d" id="panel_bottom_left" height="50%" width="30%" valign="center" childLayout="center">  
-          <effect>
-                <onHover  name="colorPulsate" startColor="#49423d" length="2500" endColor="#9ede00" cycle = "false" period = "3000" onEndEffect="StartGameEnd(mainGame)" onStartEffect="OptionsOn()"/>
-            </effect>           
-            <text  text="Start game" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
-        </panel>
-         <panel id="panel_left2" width="3%"  childLayout="vertical" >  
-         spacer 
-         </panel>
-        <panel backgroundColor="#49423d" id="panel_bottom_center" height="50%" width="30%" valign="center" childLayout="center">  
-          <effect>
-                <onHover  name="colorPulsate" startColor="#49423d" length="2500" endColor="#ff8f32" cycle = "false" period = "3000" onEndEffect="OptionsOff()" onStartEffect="OptionsOn()"/>
-            </effect>           
-            <text  text="Options" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
-        </panel>
-         <panel id="panel_left3" width="3%"  childLayout="vertical" >  
-         spacer 
-         </panel>
-        <panel backgroundColor="#49423d"    id="panel_bottom_right" height="50%" width="30%" valign="center" childLayout="center">  
-            <effect>
-                <onHover  name="colorPulsate" startColor="#49423d" length="2500" endColor="#f92e2e" cycle = "false" period = "3000" onEndEffect="QuittingOff()" onStartEffect="OptionsOn()"/>
-            </effect>           
-            <text  text="Quit Game" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
+    +++++++++++++++++++++++++++++++++++++++ 
+    lay out the start screen/layers/panels  
+    +++++++++++++++++++++++++++++++++++++++ 
+    <screen id="start" controller="mygame.Controller.StartScreenController">
+        <layer id="background" childLayout="center">
+           
+            <image filename="Interface/operation-front.jpg" mageMode="resize:40,490,110,170,40,560,40,270,40,560,40,40" width="100%" height="100%"></image>
+        </layer>
+        <layer id="foreground" childLayout="vertical" backgroundColor="#0000" > 
+            <panel id="panel_top" height="25%" width="75%" align="center" childLayout="center">  
+                <text text="Virtual operation with Leap Motion" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
+            </panel>
+            <panel valign="center"  id="panel_mid" height="50%" width="75%" align="center" childLayout="center">       
+                <control style="nifty-listbox" id="scrollbarPanelId" name="scrollPanel" horizontal="false"  height="225px">
+                    <panel  id="myScrollStuff" width="100%" childLayout="vertical" >
+                    <text  text="ong and needs to wrap at the end of lines. Here goes some text describing the game and the rules and stuff. Incidentally, the text is quite long and needs to wrap at the end of lines." 
+                              font="Interface/Fonts/CooperBlack.fnt" color="#fff" width="100%"  name="textWins" id="textWins"  height="100%" wrap="true" />
+              
+                    </panel>
+                          
+                </control>
+        
+            </panel>
+            <panel id="panel_bottom" height="25%" width="75%" align="center" childLayout="horizontal"> 
+                <panel id="panel_left1" width="3%"  childLayout="vertical" >  
+                   
+                </panel> 
+                <panel backgroundColor="#49423d" id="panel_bottom_left" height="50%" width="30%" valign="center" childLayout="center">  
+                    <effect>
+                        <onHover  name="colorPulsate" startColor="#49423d" length="2500" endColor="#9ede00" cycle = "false" period = "3000" onEndEffect="StartGameEnd(mainGame)" onStartEffect="OptionsOn()"/>
+                    </effect>           
+                    <text  text="Start game" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
+                </panel>
+                <panel id="panel_left2" width="3%"  childLayout="vertical" >  
+                    spacer 
+                </panel>
+                <panel backgroundColor="#49423d" id="panel_bottom_center" height="50%" width="30%" valign="center" childLayout="center">  
+                    <effect>
+                        <onHover  name="colorPulsate" startColor="#49423d" length="2500" endColor="#ff8f32" cycle = "false" period = "3000" onEndEffect="OptionsOff()" onStartEffect="OptionsOn()"/>
+                    </effect>           
+                    <text  text="Options" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
+                </panel>
+                <panel id="panel_left3" width="3%"  childLayout="vertical" >  
+                    spacer 
+                </panel>
+                <panel backgroundColor="#49423d"    id="panel_bottom_right" height="50%" width="30%" valign="center" childLayout="center">  
+                    <effect>
+                        <onHover  name="colorPulsate" startColor="#49423d" length="2500" endColor="#f92e2e" cycle = "false" period = "3000" onEndEffect="QuittingOff()" onStartEffect="OptionsOn()"/>
+                    </effect>           
+                    <text  text="Quit Game" font="Interface/Fonts/Default.fnt" width="100%" height="100%" />
             
-        </panel>
-      </panel>
-    </layer>
-  </screen>
-  
-  <!-- +++++++++++++++++++++++++++++++++++++++ -->
-  <!-- lay out the HUD screen/layers/panels -->
-  <!-- +++++++++++++++++++++++++++++++++++++++ -->
+                </panel>
+            </panel>
+        </layer>
+
+    </screen>
+
+    <!-- +++++++++++++++++++++++++++++++++++++++ -->
+    <!-- lay out the HUD screen/layers/panels -->
+    <!-- +++++++++++++++++++++++++++++++++++++++ -->
   
 </nifty>
